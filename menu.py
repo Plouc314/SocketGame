@@ -7,6 +7,7 @@ cposx = lambda pos: dim.center_x - int(pos[0]/2)
 DIM_TITLE = (600,120)
 POS_TITLE = (cposx(DIM_TITLE), 150)
 DIM_MAIN_B = (200,100)
+DIM_LI_MAIN_B = (200,80)
 DIM_NB = (120,60)
 DIM_TEXTBL = (150, 100)
 Y_POS_TEXTBL = 400
@@ -59,9 +60,12 @@ class Menu:
         self.text_username = TextBox(DIM_LOGINP, C.WHITE, (50, 50),'',marge=True)
         self.button_play = Button(DIM_MAIN_B, C.LIGHT_BLUE, 
                     (cposx(DIM_MAIN_B),POS_TITLE[1]+2*DIM_MAIN_B[1]), 'Play') 
-        self.chat_logged = Chat(DIM_CHAT, (dim.x-DIM_CHAT[0]-MARGE,dim.y-DIM_CHAT[1]-MARGE), self.client)
+        self.chat_logged = Chat(DIM_CHAT, (MARGE,dim.y-DIM_CHAT[1]-MARGE), self.client)
         self.friends = Friends(DIM_FR, (dim.x-DIM_FR[0]-MARGE, MARGE), self.client)
-        
+        self.button_disconn = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (50, MARGE+DIM_LOGINP[1])
+                        ,'Disconnect',font=Font.f30)
+        # state env
+        self.title_env = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Env', font=Font.f100)
 
     def display_main(self):
         self.title_main.display()
@@ -89,7 +93,15 @@ class Menu:
     def display_logged(self):
         self.title_logged.display()
         self.text_username.display()
+        self.button_disconn.display()
         self.button_play.display()
+        self.chat_logged.display()
+        self.friends.display()
+
+    def display_env(self):
+        self.title_env.display()
+        self.text_username.display()
+        self.button_disconn.display()
         self.chat_logged.display()
         self.friends.display()
 
@@ -144,7 +156,27 @@ class Menu:
         self.chat_logged.react_events(events, pressed)
         if self.button_play.pushed(events):
             print('play')
+        if self.button_disconn.pushed(events):
+            self.disconn()
         self.friends.react_events(events, pressed)
+        # check for env 
+        if self.client.in_env:
+            self.state = 'env'
+
+    def react_events_env(self, events, pressed):
+        self.chat_logged.react_events(events, pressed)
+        if self.button_disconn.pushed(events):
+            self.disconn()
+        self.friends.react_events(events, pressed)
+
+    def disconn(self):
+        self.client.disconn()
+        self.state = 'main'
+        self.input_password.text = ''
+        self.input_username.text = ''
+        self.chat_logged.reset()
+        self.friends.reset()
+
 
     def run(self, events, pressed):
         if self.state == 'main':
@@ -159,6 +191,9 @@ class Menu:
         elif self.state == 'logged':
             self.display_logged()
             self.react_events_logged(events, pressed)
+        elif self.state == 'env':
+            self.display_env()
+            self.react_events_env(events, pressed)
         elif self.state == 'fail log':
             self.display_faillog()
             self.react_events_login(events, pressed)

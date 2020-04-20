@@ -18,6 +18,9 @@ class Chat:
         self.client_thread = Thread(target=self.client.loop_msg)
         self.client_thread.start()
 
+    def reset(self):
+        self.msgs = []
+
     def display(self):
         self.text_box.display()
         self.input_text.display()

@@ -5,7 +5,7 @@ from time import sleep
 from helper import cumsum, filt
 
 HEADER = 64
-PORT = 5050
+PORT = 44778 #5050
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
@@ -67,6 +67,8 @@ class Data:
     users = load_user_data()
 
 class Client:
+    in_env = False
+    env = None
     def __init__(self, conn, addr):
         self.conn = conn
         self.addr = addr
@@ -84,6 +86,7 @@ class Client:
         index = select_name_index[0]
         if Data.users.iloc[index,1] == password.strip():
             send(self.conn, 'logged')
+            sleep(.1) # let the time to the client to start the separated thread
             self.on_log(username)
         else:
             send(self.conn, 'false')
@@ -96,8 +99,10 @@ class Client:
         else:
             Data.users = Data.users.append({'username':username,'password':password.strip(),'friends':[],'demands':[]}, ignore_index=True)
             store_user_data()
-            self.on_log(username)
             send(self.conn, 'signed')
+            sleep(.1) # let the time to the client to start the separated thread
+            self.on_log(username)
+            
 
     def on_log(self, username):
         self.logged = True
@@ -112,24 +117,50 @@ class Client:
     def look_for_fr_request(self):
         demands = Data.users[Data.users['username'] == self.username]['demands'].values[0]
         for index in demands:
-            username = Data.users.loc[int(index), 'username']
+            username = Data.users.loc[index, 'username']
             send(self.conn, f'dfr-{username}')
 
     def add_friend(self, username):
         other_index = Data.users[Data.users['username'] == username].index[0]
         # add friend to data
-        Data.users.loc[self.index,'friends'].append(str(other_index))
-        Data.users.loc[other_index,'friends'].append(str(self.index))
+        Data.users.loc[self.index,'friends'].append(other_index)
+        Data.users.loc[other_index,'friends'].append(self.index)
         # remove other from demands
-        Data.users.loc[self.index,'demands'].remove(str(other_index))
+        Data.users.loc[self.index,'demands'].remove(other_index)
+        store_user_data()
+        Interaction.manage_friends(self)
         # if other is connected, update his friends
         if Interaction.is_connected(username):
             other_client = Interaction.get_client(username)
             Interaction.manage_friends(other_client)
 
+    def del_friend(self, username):
+        # update data
+        other_index = Data.users[Data.users['username'] == username].index[0]
+        Data.users.loc[self.index, 'friends'].remove(other_index)
+        Data.users.loc[other_index, 'friends'].remove(self.index)
+        if Interaction.is_connected(username):
+            other_client = Interaction.get_client(username)
+            send(other_client.conn, f'delfr-{self.username}')
+
     def reject_demand(self, username):
         other_index = Data.users[Data.users['username'] == username].index[0]
-        Data.users[Data.users['username']==self.username]['demands'].values[0].remove(str(other_index))
+        Data.users[Data.users['username']==self.username]['demands'].values[0].remove(other_index)
+
+    def invite_friend(self, username):
+        # check if friend is conn
+        if Interaction.is_connected(username):
+            other_client = Interaction.get_client(username)
+            send(other_client.conn, f'inv-{self.username}')
+
+    def create_env(self, username):
+        # check other is conn
+        if Interaction.is_connected(username):
+            other_client = Interaction.get_client(username)
+            self.env = Env((self, other_client),(self.username, other_client.username))
+            other_client.env = self.env
+            other_client.in_env = True
+            self.in_env = True
 
     def run(self):
         while self.connected:
@@ -139,6 +170,7 @@ class Client:
                     # disconnect
                     self.connected = False
                     Interaction.disconn_friend(self)
+                    clients.remove(self)
                     print(f"[{self.addr}] {msg}")
                     break
 
@@ -152,19 +184,45 @@ class Client:
                 else:
                     print(f'[{self.username}] {msg}')
                     msg = msg.split('-')
-                    if msg[0] == 'chat': # chat message
+                    if msg[0] == 'disconn':
+                        Interaction.disconn_friend(self)
+                        self.logged = False
+                        # send to client to interrupt inf loop
+                        send(self.conn, 'disconn') 
+                    # chat message
+                    elif msg[0] == 'chat': 
                         self.chat_current_msg = msg[1]
-                    elif msg[0] == 'dfr': # send a friend demand
+                    # send a friend demand
+                    elif msg[0] == 'dfr': 
                         self.current_demand = msg[1]
-                    elif msg[0] == 'rdfr': # send answer to a friend demand
+                    # send answer to a friend demand
+                    elif msg[0] == 'rdfr':
                         if msg[2] == 'True': # demand accepted
                             self.add_friend(msg[1])
                         else: # demand rejected
                             self.reject_demand(msg[1])
+                    # send delete a friend
+                    elif msg[0] == 'delfr': 
+                        self.del_friend(msg[1])
+                    # invite a friend
+                    elif msg[0] == 'inv':
+                        self.invite_friend(msg[1])
+                    # get answer of invitation
+                    elif msg[0] == 'rinv':
+                        self.create_env(msg[1])
 
                     
         self.conn.close()
 
+class Env:
+    def __init__(self, clients, usernames):
+        self.clients = clients
+        self.usernames = usernames
+        self.client0 = clients[0]
+        self.client1 = clients[1]
+        # send to clients that there in an env
+        send(self.client0.conn, f'env-conn-{usernames[1]}')
+        send(self.client1.conn, f'env-conn-{usernames[0]}')
 
 class Interaction:
     clients = []
@@ -207,7 +265,7 @@ class Interaction:
             for requester, requested in cls.current_demands.items():
                 # update data
                 index_requester = Data.users[Data.users['username'] == requester].index[0]
-                Data.users[Data.users['username'] == requested]['demands'].values[0].append(str(index_requester))
+                Data.users[Data.users['username'] == requested]['demands'].values[0].append(index_requester)
 
                 if cls.is_connected(requested):
                     current_client = cls.get_client(requested)
@@ -227,6 +285,11 @@ class Interaction:
         # send to all connected friends that the new client is disconnected
         for friend in friends:
             send(friend.conn, f'fr-disconn-{disc_client.username}')
+        
+        # remove client from Interaction
+        try:
+            cls.clients.remove(disc_client)
+        except: pass
 
     @classmethod
     def manage_friends(cls, new_client):
@@ -239,7 +302,7 @@ class Interaction:
         
         # send to new client all connected friends
         for i, is_conn in client_friends.items():
-            username = Data.users.loc[int(i),'username']
+            username = Data.users.loc[i,'username']
             if is_conn:
                 send(new_client.conn, f'fr-conn-{username}')
             else:
@@ -252,7 +315,7 @@ class Interaction:
         client_friends = {v:False for v in Data.users.loc[index, 'friends']}
         friends = []
         for client in cls.clients:
-            if str(index) in client.friends:
+            if index in client.friends:
                 friends.append(client)
                 client_friends[client.index] = True
         return friends, client_friends
