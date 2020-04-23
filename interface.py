@@ -1,7 +1,19 @@
 import pygame
-from numpy import mean
 
 pygame.init()
+
+def mean(array):
+    total = 0
+    for v in array:
+        total += v
+    return total/len(array)
+
+def set_screen(screen):
+    TextBox.screen = screen
+    Button.screen = screen
+    InputText.screen = screen
+    Cadre.screen = screen
+    Interface.screen = screen
 
 class Dimension:
     def __init__(self, dim):
@@ -12,12 +24,13 @@ class Dimension:
         self.x = dim[0]
         self.y = dim[1]
 
-dim = Dimension((3000,1600))
+screen = None
 
 class C:
     WHITE = (255,255,255)
     BLACK = (0,0,0)
     LIGHT_BLUE = (135,206,250)
+    BLUE = (65,105,225)
     LIGHT_GREY = (200,200,200)
     LIGHT_RED = (255, 80, 80)
     RED = (225, 50, 50)
@@ -28,11 +41,10 @@ class Font:
     f25 = pygame.font.SysFont("Arial", 25)
     f30 = pygame.font.SysFont("Arial", 30)
     f50 = pygame.font.SysFont("Arial", 50)
+    f70 = pygame.font.SysFont("Arial", 70)
     f100 = pygame.font.SysFont("Arial", 100)
 
-screen = pygame.display.set_mode(dim.window)
-screen.fill(C.WHITE)
-pygame.display.set_caption('Game')
+
 
 class Form(pygame.sprite.Sprite):
     screen = screen
@@ -106,9 +118,15 @@ class Cadre(Form):
         self.display_margin()
 
 class Button(Form):
-    def __init__(self, dim, color, pos, text='', TEXT_COLOR=(0,0,0), centered=True, font=Font.f50):
+    def __init__(self, dim, color, pos, text='', TEXT_COLOR=(0,0,0), 
+                    centered=True, font=Font.f50, image=False):
         super().__init__(dim, color)
-        self.text = text
+        if image:
+            self.img = pygame.transform.scale(image, dim)
+            self.as_image = True
+        else:
+            self.as_image = False
+            self.text = text
         self.TEXT_COLOR = TEXT_COLOR
         self.pos = pos
         self.set_corners(pos, dim)
@@ -149,11 +167,15 @@ class Button(Form):
         
         self.display_margin()
         
-        x_marge, y_marge = center_text(self.dim, self.font, self.text)
-        if not self.centered:
-            x_marge = 5
-        font_text = self.font.render(self.text,True,self.TEXT_COLOR)
-        self.screen.blit(font_text,(self.pos[0]+x_marge,self.pos[1]+y_marge))
+        # if it's text
+        if not self.as_image:
+            x_marge, y_marge = center_text(self.dim, self.font, self.text)
+            if not self.centered:
+                x_marge = 5
+            font_text = self.font.render(self.text,True,self.TEXT_COLOR)
+            self.screen.blit(font_text,(self.pos[0]+x_marge,self.pos[1]+y_marge))
+        else:
+            self.screen.blit(self.img, self.pos)
 
 class TextBox(Form):
     def __init__(self, dim, background_color, pos, text='', 
@@ -189,7 +211,32 @@ class TextBox(Form):
             font_text = self.font.render(line,True,self.TEXT_COLOR)
             self.screen.blit(font_text,(self.pos[0]+x_marge,self.pos[1]+i*y_line+y_marge))
 
-from helper import get_pressed_key, Delayed
+class Delayed:
+    '''
+    Creates decorators,
+
+    The decorated function should return True/False depending on whether or not it has been activated,
+    if true, creates a delay in order to be spammed.
+    '''
+    wait = 0
+    delayed = False
+    def __init__(self, delay):
+        self.delay = delay
+        
+    def __call__(self, func):
+        def inner(*args, **kwargs):
+            if self.delayed:
+                self.wait += 1
+                if self.wait == self.delay:
+                    self.delayed = False
+                    self.wait = 0
+            else:
+                # first argument if a boolean value of if the tested key was pressed
+                executed = func(*args, **kwargs)
+                if executed:
+                    self.delayed = True
+                return executed
+        return inner
 
 get_input_deco = Delayed(3)
 cursor_deco = Delayed(20)
@@ -287,3 +334,78 @@ class Interface:
         return pressed, events
 
 
+def get_pressed_key(pressed):
+    if pressed[pygame.K_a]:
+        return 'a'
+    elif pressed[pygame.K_b]:
+        return 'b'
+    elif pressed[pygame.K_c]:
+        return 'c'
+    elif pressed[pygame.K_d]:
+        return 'd'    
+    elif pressed[pygame.K_e]:
+        return 'e'
+    elif pressed[pygame.K_f]:
+        return 'f'
+    elif pressed[pygame.K_g]:
+        return 'g'
+    elif pressed[pygame.K_h]:
+        return 'h'
+    elif pressed[pygame.K_i]:
+        return 'i'
+    elif pressed[pygame.K_j]:
+        return 'j'
+    elif pressed[pygame.K_k]:
+        return 'k'
+    elif pressed[pygame.K_l]:
+        return 'l'
+    elif pressed[pygame.K_m]:
+        return 'm'
+    elif pressed[pygame.K_n]:
+        return 'n'
+    elif pressed[pygame.K_o]:
+        return 'o'
+    elif pressed[pygame.K_p]:
+        return 'p'
+    elif pressed[pygame.K_q]:
+        return 'q'
+    elif pressed[pygame.K_r]:
+        return 'r'
+    elif pressed[pygame.K_s]:
+        return 's'
+    elif pressed[pygame.K_t]:
+        return 't'
+    elif pressed[pygame.K_u]:
+        return 'u'
+    elif pressed[pygame.K_v]:
+        return 'v'
+    elif pressed[pygame.K_w]:
+        return 'w'
+    elif pressed[pygame.K_x]:
+        return 'x'
+    elif pressed[pygame.K_y]:
+        return 'y'
+    elif pressed[pygame.K_z]:
+        return 'z'
+    elif pressed[pygame.K_1]:
+        return '1'
+    elif pressed[pygame.K_2]:
+        return '2'
+    elif pressed[pygame.K_3]:
+        return '3'
+    elif pressed[pygame.K_4]:
+        return '4'
+    elif pressed[pygame.K_5]:
+        return '5'
+    elif pressed[pygame.K_6]:
+        return '6'
+    elif pressed[pygame.K_7]:
+        return '7'
+    elif pressed[pygame.K_8]:
+        return '8'
+    elif pressed[pygame.K_9]:
+        return '9'
+    elif pressed[pygame.K_0]:
+        return '0'
+    elif pressed[pygame.K_SPACE]:
+        return ' '

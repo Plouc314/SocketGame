@@ -48,7 +48,7 @@ def start():
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 2}")
 
 def load_user_data():
-    to_list = lambda x:  x.split('-')
+    to_list = lambda x:  x.split('|')
     data = pd.read_csv('user_data.csv', dtype='object')
     data.index = data.index.astype('int64')
     data.fillna('', inplace=True)
@@ -57,7 +57,7 @@ def load_user_data():
     return data
 
 def store_user_data():
-    inv_to_list = lambda x: cumsum(x, '', '-')
+    inv_to_list = lambda x: cumsum(x, '', '|')
     store_df = Data.users.copy()
     store_df['friends'] = store_df['friends'].map(inv_to_list)
     store_df['demands'] = store_df['demands'].map(inv_to_list)
@@ -68,13 +68,14 @@ class Data:
 
 class Client:
     in_env = False
-    env = None
+    team = None
     def __init__(self, conn, addr):
         self.conn = conn
         self.addr = addr
         self.connected = True
         self.logged = False
         self.chat_current_msg = None
+        self.env_msgs = []
         self.current_demand = None
     
     def log(self, username, password):
@@ -103,7 +104,6 @@ class Client:
             sleep(.1) # let the time to the client to start the separated thread
             self.on_log(username)
             
-
     def on_log(self, username):
         self.logged = True
         Interaction.clients.append(self)
@@ -118,7 +118,7 @@ class Client:
         demands = Data.users[Data.users['username'] == self.username]['demands'].values[0]
         for index in demands:
             username = Data.users.loc[index, 'username']
-            send(self.conn, f'dfr-{username}')
+            send(self.conn, f'dfr|{username}')
 
     def add_friend(self, username):
         other_index = Data.users[Data.users['username'] == username].index[0]
@@ -141,7 +141,7 @@ class Client:
         Data.users.loc[other_index, 'friends'].remove(self.index)
         if Interaction.is_connected(username):
             other_client = Interaction.get_client(username)
-            send(other_client.conn, f'delfr-{self.username}')
+            send(other_client.conn, f'delfr|{self.username}')
 
     def reject_demand(self, username):
         other_index = Data.users[Data.users['username'] == username].index[0]
@@ -151,16 +151,21 @@ class Client:
         # check if friend is conn
         if Interaction.is_connected(username):
             other_client = Interaction.get_client(username)
-            send(other_client.conn, f'inv-{self.username}')
+            send(other_client.conn, f'inv|{self.username}')
 
     def create_env(self, username):
         # check other is conn
         if Interaction.is_connected(username):
             other_client = Interaction.get_client(username)
             self.env = Env((self, other_client),(self.username, other_client.username))
+            Interaction.envs.append(self.env)
             other_client.env = self.env
             other_client.in_env = True
             self.in_env = True
+
+    def when_play(self):
+        # send team to player
+        send(self.conn, f'env|team|{self.team}')
 
     def run(self):
         while self.connected:
@@ -169,26 +174,37 @@ class Client:
                 if msg == DISCONNECT_MESSAGE:
                     # disconnect
                     self.connected = False
-                    Interaction.disconn_friend(self)
+                    if self.logged:
+                        Interaction.disconn_friend(self)
                     clients.remove(self)
                     print(f"[{self.addr}] {msg}")
                     break
 
                 if not self.logged:
                     print(f"[{self.addr}] {msg}")
-                    state, username, password = msg.split('-')
+                    state, username, password = msg.split('|')
                     if state == 'log':
                         self.log(username, password)
                     elif state == 'sign':
                         self.sign(username, password)
                 else:
-                    print(f'[{self.username}] {msg}')
-                    msg = msg.split('-')
+                    if self.in_env:
+                        if not self.env.in_game:
+                            print(f'[{self.username}] {msg}')
+                    else:
+                        print(f'[{self.username}] {msg}')
+                    msg = msg.split('|')
                     if msg[0] == 'disconn':
                         Interaction.disconn_friend(self)
                         self.logged = False
                         # send to client to interrupt inf loop
                         send(self.conn, 'disconn') 
+                    # env msg 
+                    elif msg[0] == 'env':
+                        if msg[1] == 'play':
+                            self.when_play()
+                        else:
+                            self.env_msgs.append(msg[1:])
                     # chat message
                     elif msg[0] == 'chat': 
                         self.chat_current_msg = msg[1]
@@ -215,19 +231,67 @@ class Client:
         self.conn.close()
 
 class Env:
+    active = True
+    in_game = False
     def __init__(self, clients, usernames):
-        self.clients = clients
-        self.usernames = usernames
-        self.client0 = clients[0]
-        self.client1 = clients[1]
+        self.clients = list(clients)
+        ### TEMPORARY ###
+        self.clients[0].team = 0
+        self.clients[1].team = 1
+        ###
+        self.usernames = list(usernames)
+        self.ready_players = []
         # send to clients that there in an env
-        send(self.client0.conn, f'env-conn-{usernames[1]}')
-        send(self.client1.conn, f'env-conn-{usernames[0]}')
+        for client in self.clients:
+            usernames = self.usernames.copy()
+            usernames.remove(client.username)
+            usernames = '|'.join(usernames)
+            send(client.conn, f'env|conn|{usernames}')
+        # start thread for run func
+        run_thread = threading.Thread(target=self.run)
+        run_thread.start()
+    
+    def run(self):
+        while self.active:
+            sleep(0.01)
+            msgs = {}
+            # get clients msgs
+            for client in self.clients:
+                msgs[client.username] = client.env_msgs
+                client.env_msgs = []
+            
+            if self.in_game:
+                # send msgs to clients
+                for username, list_current_msgs in msgs.items():
+                    for current_msgs in list_current_msgs:
+                        for client in self.clients:
+                            if client.username != username:
+                                current_msgs = '|'.join(current_msgs)
+                                send(client.conn, f'env|{current_msgs}')
+            else:
+                
+                for username, list_current_msgs in msgs.items():
+                    for current_msgs in list_current_msgs:
+                        if current_msgs[0] == 'ready':
+                            weapon = current_msgs[1]
+                            char = current_msgs[2]
+                            team = current_msgs[3]
+                            for client in self.clients:
+                                if username != client.username:
+                                    send(client.conn, f'env|ready|{username}|{weapon}|{char}|{team}')
+                            d = {'username':username,'weapon':weapon,'char':char,'team':team}
+                            self.ready_players.append(d)
+                
+                if len(self.ready_players) == len(self.clients):
+                    self.in_game = True
+                            
+
 
 class Interaction:
     clients = []
     current_contents = []
     current_demands = {}
+    envs = []
 
     @classmethod
     def run(cls):
@@ -250,7 +314,7 @@ class Interaction:
             for client in cls.clients:
                 for content in cls.current_contents:
                     if content[0] != client.username:
-                        send(client.conn, 'chat-' + content[0] + '-' + content[1])
+                        send(client.conn, 'chat|' + content[0] + '|' + content[1])
             
             # empties the messages list
             cls.current_contents = []
@@ -284,7 +348,7 @@ class Interaction:
 
         # send to all connected friends that the new client is disconnected
         for friend in friends:
-            send(friend.conn, f'fr-disconn-{disc_client.username}')
+            send(friend.conn, f'fr|disconn|{disc_client.username}')
         
         # remove client from Interaction
         try:
@@ -298,15 +362,15 @@ class Interaction:
         
         # send to all connected friends that the new client is connected
         for friend in friends:
-            send(friend.conn, f'fr-conn-{new_client.username}')
+            send(friend.conn, f'fr|conn|{new_client.username}')
         
         # send to new client all connected friends
         for i, is_conn in client_friends.items():
             username = Data.users.loc[i,'username']
             if is_conn:
-                send(new_client.conn, f'fr-conn-{username}')
+                send(new_client.conn, f'fr|conn|{username}')
             else:
-                send(new_client.conn, f'fr-disconn-{username}')
+                send(new_client.conn, f'fr|disconn|{username}')
                 
     @classmethod
     def get_connected_friends(cls, the_client):

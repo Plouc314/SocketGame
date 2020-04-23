@@ -1,6 +1,7 @@
-from interface import TextBox, Button, InputText, Cadre, C, Font, dim
+from base import TextBox, Button, InputText, Cadre, C, Font, dim
 from chat import Chat
 from friends import Friends
+from game.main import run_game, start_game
 
 cposx = lambda pos: dim.center_x - int(pos[0]/2)
 
@@ -101,6 +102,7 @@ class Menu:
     def display_env(self):
         self.title_env.display()
         self.text_username.display()
+        self.button_play.display()
         self.button_disconn.display()
         self.chat_logged.display()
         self.friends.display()
@@ -168,6 +170,10 @@ class Menu:
         if self.button_disconn.pushed(events):
             self.disconn()
         self.friends.react_events(events, pressed)
+        if self.button_play.pushed(events):
+            self.client.env_play()
+            start_game(self.client)
+            self.state = 'in game'
 
     def disconn(self):
         self.client.disconn()
@@ -200,3 +206,5 @@ class Menu:
         elif self.state == 'fail sign':
             self.display_failsign()
             self.react_events_signup(events, pressed)
+        elif self.state == 'in game':
+            run_game(pressed, events)

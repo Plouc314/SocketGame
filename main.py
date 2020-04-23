@@ -1,6 +1,9 @@
-from interface import Interface, InputText
+from base import Interface, InputText
 from menu import Menu
 from client import Client
+import pygame
+
+pygame.init()
 
 inter = Interface()
 

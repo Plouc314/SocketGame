@@ -1,4 +1,4 @@
-from interface import TextBox, InputText, Button, C, Font
+from base import TextBox, InputText, Button, C, Font
 import pygame
 from helper import cumsum
 from threading import Thread

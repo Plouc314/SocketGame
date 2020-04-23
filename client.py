@@ -18,10 +18,13 @@ class Client:
     fr_msgs = []
     fr_demands = []
     friends = {}
+    ready_users = []
+    game_msgs = []
     invs = []
     is_del_fr = False
     in_env = False
-    env_user = None
+    env_users = None
+    in_game = False
     def __init__(self):
         self.logged = False
         self.connected = True
@@ -30,7 +33,7 @@ class Client:
     
     def log(self, username, password):
         
-        self.send(f'log-{username}-{password}')
+        self.send(f'log|{username}|{password}')
         
         # wait for response
         response = self.receive_msg()
@@ -44,7 +47,7 @@ class Client:
     
     def sign_up(self, username, password):
 
-        self.send(f'sign-{username}-{password}')
+        self.send(f'sign|{username}|{password}')
 
         # wait for response
         response = self.receive_msg()
@@ -64,8 +67,9 @@ class Client:
         while self.logged:
             msg = self.receive_msg()
             if msg:
-                print(f'[SERVER] {msg}')
-                msg = msg.split('-')
+                if not self.in_game:
+                    print(f'[SERVER] {msg}')
+                msg = msg.split('|')
                 # check to know type of msg
                 if msg[0] == 'chat': # chat msg
                     username = msg[1]
@@ -87,14 +91,26 @@ class Client:
                     self.invs.append(msg[1])
                 # env msgs
                 elif msg[0] == 'env':
-                    if msg[1] == 'conn':
-                        self.in_env = True
-                        self.env_user = msg[2]
-
-
+                    if not self.in_game:
+                        if msg[1] == 'conn':
+                            self.in_env = True
+                            self.env_users = msg[2:]
+                            self.n_env_users = len(self.env_users) + 1
+                        elif msg[1] == 'ready':
+                            self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
+                        elif msg[1] == 'team':
+                            self.team = int(msg[2])
+                    else:
+                        username = msg[1]
+                        angle = float(msg[2])
+                        fire = int(msg[3])
+                        left = int(msg[4])
+                        right = int(msg[5])
+                        jump = int(msg[6])
+                        self.game_msgs.append({'username':username, 'angle':angle, 'fire':fire, 'left':left, 'right':right, 'jump':jump})
 
     def send_chat_msg(self, msg):
-        self.send(f'chat-{msg}')
+        self.send(f'chat|{msg}')
     
     def send(self,msg):
         message = msg.encode(FORMAT)
@@ -128,7 +144,7 @@ class Client:
 
     def del_friend(self, username):
         self.friends.pop(username)
-        self.send(f'delfr-{username}')
+        self.send(f'delfr|{username}')
 
     def get_invs(self):
         invs = self.invs
@@ -146,16 +162,22 @@ class Client:
         return demands
 
     def invite_friend(self, username):
-        self.send(f'inv-{username}')
+        self.send(f'inv|{username}')
 
     def return_inv_fr(self, username):
-        self.send(f'rinv-{username}')
+        self.send(f'rinv|{username}')
 
     def demand_friend(self, username):
-        self.send(f'dfr-{username}')
+        self.send(f'dfr|{username}')
     
     def return_friend_demand(self, username, accepted):
-        self.send(f'rdfr-{username}-{accepted}')
+        self.send(f'rdfr|{username}|{accepted}')
 
+    def env_play(self):
+        self.send(f'env|play')
 
-
+    def env_ready(self, weapon, char):
+        self.send(f'env|ready|{weapon}|{char}|{self.team}')
+    
+    def env_game(self, angle, fire, left, right, jump):
+        self.send(f'env|{self.username}|{angle:.2f}|{fire}|{left}|{right}|{jump}')

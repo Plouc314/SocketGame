@@ -1,4 +1,4 @@
-from interface import TextBox, InputText, Button, Cadre, C, Font
+from base import TextBox, InputText, Button, Cadre, C, Font
 import pygame
 
 DIM_DFR_B = (100,60)
