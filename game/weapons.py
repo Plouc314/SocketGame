@@ -7,11 +7,11 @@ DIM_W = (140,140)
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
-ak = pygame.image.load(fpath+'ak.png')
-m4 = pygame.image.load(fpath+'m4.png')
-sniper = pygame.image.load(fpath+'sniper.png')
-bazooka = pygame.image.load(fpath+'bazooka.png')
-explosion = pygame.image.load(fpath+'explosion.png')
+ak = pygame.image.load('game/imgs/ak.png')
+m4 = pygame.image.load('game/imgs/m4.png')
+sniper = pygame.image.load('game/imgs/sniper.png')
+bazooka = pygame.image.load('game/imgs/bazooka.png')
+explosion = pygame.image.load('game/imgs/explosion.png')
 
 class Weapon:
     pos = None

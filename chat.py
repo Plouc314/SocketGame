@@ -1,16 +1,19 @@
-from base import TextBox, InputText, Button, C, Font
+from base import TextBox, InputText, Button, C, Font, dim
 import pygame
-from helper import cumsum
+from helper import cumsum, scale
 from threading import Thread
+
+E = lambda x: int(x*dim.f) 
+DIM_B = scale((120,80), dim.f)
 
 class Chat:
     msgs = []
     MAX_MSG = 8
     def __init__(self, dim, pos, client):
         self.pos = pos
-        self.text_box = TextBox((dim[0], dim[1]-80), C.WHITE, pos, marge=True, centered=False, font=Font.f30)
-        self.input_text = InputText((dim[0]-120, 80), (pos[0], pos[1]+dim[1]-80),C.WHITE, font=Font.f30)
-        self.button_send = Button((120,80), C.LIGHT_BLUE, (pos[0]+dim[0]-120, pos[1]+dim[1]-80),'Send',font=Font.f30)
+        self.text_box = TextBox((dim[0], dim[1]-E(80)), C.WHITE, pos, marge=True, centered=False, font=Font.f30)
+        self.input_text = InputText((dim[0]-E(120), E(80)), (pos[0], pos[1]+dim[1]-E(80)),C.WHITE, font=Font.f30)
+        self.button_send = Button(DIM_B, C.LIGHT_BLUE, (pos[0]+dim[0]-E(120), pos[1]+dim[1]-E(80)),'Send',font=Font.f30)
 
         self.client = client
 

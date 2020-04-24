@@ -42,3 +42,13 @@ def mean(array):
         total += v
     return total/len(array)
 
+def scale(x,factor):
+    if type(x) == list or type(x) == tuple:
+        x = list(x)
+        for i in range(len(x)):
+            x[i] = int(x[i]*factor)
+    else:
+        x = int(x*factor)
+    return x
+        
+

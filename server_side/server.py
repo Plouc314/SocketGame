@@ -5,8 +5,8 @@ from time import sleep
 from helper import cumsum, filt
 
 HEADER = 64
-PORT = 44778 #5050
-SERVER = socket.gethostbyname(socket.gethostname())
+PORT = 5050 #44778 
+SERVER = ''#socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"

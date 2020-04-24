@@ -2,24 +2,35 @@ from base import TextBox, Button, InputText, Cadre, C, Font, dim
 from chat import Chat
 from friends import Friends
 from game.main import run_game, start_game
+from helper import scale
 
-cposx = lambda pos: dim.center_x - int(pos[0]/2)
+center_x = 1500 # base to be rescaled
 
-DIM_TITLE = (600,120)
-POS_TITLE = (cposx(DIM_TITLE), 150)
-DIM_MAIN_B = (200,100)
-DIM_LI_MAIN_B = (200,80)
-DIM_NB = (120,60)
-DIM_TEXTBL = (150, 100)
-Y_POS_TEXTBL = 400
-X_POS_TEXTBL = dim.center_x - 250
-DIM_LOGINP = (400,80)
-X_POS_LOGINP = dim.center_x
-DIM_FAILT = (400,80)
-Y_POS_FAILT = 320
-DIM_CHAT = (800,600)
-DIM_FR = (800,500)
-MARGE = 100
+cposx = lambda pos: (dim.center_x - int(pos[0]/2))/dim.f # will be rescaled after
+
+DIM_TITLE = scale((600,120), dim.f)
+POS_TITLE = scale((cposx(DIM_TITLE), 150), dim.f)
+DIM_MAIN_B = scale((200,100), dim.f)
+DIM_LI_MAIN_B = scale((200,80), dim.f)
+DIM_NB = scale((120,60), dim.f)
+DIM_TEXTBL = scale((150, 100), dim.f)
+Y_POS_TEXTBL = scale(400, dim.f)
+Y_POS_TEXTBL2 = scale(550, dim.f)
+X_POS_TEXTBL = scale(center_x - 250, dim.f)
+X_POS_TEXTBL2 = scale(center_x - 200, dim.f)
+DIM_LOGINP = scale((400,80), dim.f)
+X_POS_LOGINP = scale(center_x, dim.f)
+DIM_FAILT = scale((400,80), dim.f)
+Y_POS_FAILT = scale(320, dim.f)
+DIM_CHAT = scale((800,600), dim.f)
+DIM_FR = scale((800,500), dim.f)
+POS_BLOG = (scale(cposx(DIM_MAIN_B), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
+POS_BSIGN = (scale(cposx(DIM_MAIN_B), dim.f),POS_TITLE[1]+4*DIM_MAIN_B[1])
+POS_BDONE = scale((center_x+240, 750), dim.f)
+POS_BBACK = scale((100,100), dim.f)
+POS_BPLAY = (scale(cposx(DIM_MAIN_B), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
+MARGE = scale(100, dim.f)
+LMARGE = scale(50, dim.f)
 
 class Menu:
     def __init__(self, client):
@@ -29,11 +40,11 @@ class Menu:
         self.title_main = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Title', font=Font.f100)
 
         self.button_login = Button(DIM_MAIN_B, C.LIGHT_BLUE,
-                                (cposx(DIM_MAIN_B),POS_TITLE[1]+2*DIM_MAIN_B[1]),'Log in')
+                                POS_BLOG,'Log in')
 
 
         self.button_signup = Button(DIM_MAIN_B, C.LIGHT_BLUE,
-                                (cposx(DIM_MAIN_B),POS_TITLE[1]+4*DIM_MAIN_B[1]),'Sign up') 
+                                POS_BSIGN,'Sign up') 
 
         # state login
         self.title_login = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Log in', font=Font.f100)
@@ -42,28 +53,28 @@ class Menu:
                                 (X_POS_TEXTBL, Y_POS_TEXTBL), 'Username:', font=Font.f30)
 
         self.text_password = TextBox(DIM_TEXTBL,C.WHITE,
-                                (X_POS_TEXTBL, Y_POS_TEXTBL+150), 'Password:', font=Font.f30)
+                                (X_POS_TEXTBL, Y_POS_TEXTBL2), 'Password:', font=Font.f30)
 
         self.input_username = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL),C.WHITE)
-        self.input_password = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL+150),C.WHITE)
-        self.button_done = Button(DIM_NB,C.LIGHT_BLUE, (dim.center_x+2*DIM_NB[0], Y_POS_TEXTBL+350), 'Done', font=Font.f30)
-        self.button_back = Button(DIM_NB, C.LIGHT_BLUE, (100,100),'Back', font=Font.f30)
+        self.input_password = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL2),C.WHITE)
+        self.button_done = Button(DIM_NB,C.LIGHT_BLUE, POS_BDONE, 'Done', font=Font.f30)
+        self.button_back = Button(DIM_NB, C.LIGHT_BLUE, POS_BBACK,'Back', font=Font.f30)
         # state signup
         self.title_signup = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Sign up', font=Font.f100) 
         # state fail log
-        self.text_faillog = TextBox(DIM_FAILT, C.WHITE, (X_POS_TEXTBL+50, Y_POS_FAILT),
+        self.text_faillog = TextBox(DIM_FAILT, C.WHITE, (X_POS_TEXTBL2, Y_POS_FAILT),
                                 'Invalid username or password', font=Font.f25, TEXT_COLOR=C.RED)  
         # state fail sign
-        self.text_failsign = TextBox(DIM_FAILT, C.WHITE, (X_POS_TEXTBL+50, Y_POS_FAILT),
+        self.text_failsign = TextBox(DIM_FAILT, C.WHITE, (X_POS_TEXTBL2, Y_POS_FAILT),
                                 'Username already taken', font=Font.f25, TEXT_COLOR=C.RED)  
         # state logged
         self.title_logged = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Welcome', font=Font.f100)
-        self.text_username = TextBox(DIM_LOGINP, C.WHITE, (50, 50),'',marge=True)
+        self.text_username = TextBox(DIM_LOGINP, C.WHITE, (LMARGE, LMARGE),'',marge=True)
         self.button_play = Button(DIM_MAIN_B, C.LIGHT_BLUE, 
-                    (cposx(DIM_MAIN_B),POS_TITLE[1]+2*DIM_MAIN_B[1]), 'Play') 
+                    POS_BPLAY, 'Play') 
         self.chat_logged = Chat(DIM_CHAT, (MARGE,dim.y-DIM_CHAT[1]-MARGE), self.client)
         self.friends = Friends(DIM_FR, (dim.x-DIM_FR[0]-MARGE, MARGE), self.client)
-        self.button_disconn = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (50, MARGE+DIM_LOGINP[1])
+        self.button_disconn = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (LMARGE, MARGE+DIM_LOGINP[1])
                         ,'Disconnect',font=Font.f30)
         # state env
         self.title_env = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Env', font=Font.f100)

@@ -2,16 +2,17 @@ import pygame
 import math
 from base import screen, C, dim, Font
 from .helper import Delayed, Counter 
-
+from helper import scale
+E = lambda x: int(x*dim.f) 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
-char_1 = pygame.image.load(fpath+'c1.png')
-char_2 = pygame.image.load(fpath+'unicorn.png')
+char_1 = pygame.image.load('game/imgs/c1.png')
+char_2 = pygame.image.load('game/imgs/unicorn.png')
 
 chars = [char_1, char_2]
 
-DIM_P = (160,160)
-DIM_HB = (130, 20)
+DIM_P = scale((160,160), dim.f)
+DIM_HB = scale((130, 20), dim.f)
 
 SMOUSEBUTTONDOWN = 0
 SMOVELEFT = 1
@@ -22,9 +23,9 @@ SJUMP = 3
 class Player:
     orien = 0
     weapon = None
-    SPEED = 15
-    POWER_JUMP = 12
-    POS_W = (50,100)
+    SPEED = E(15)
+    POWER_JUMP = math.sqrt(E(150))
+    POS_W = scale((50,100), dim.f)
     dim = DIM_P
     SPAWN_POS = (100,100)
     dead = False
@@ -196,13 +197,13 @@ class Player:
         x = int((100-self.health) * DIM_HB[0]/100)
         red_surf = pygame.Surface((x,DIM_HB[1]))
         red_surf.fill(C.RED)
-        screen.blit(self.health_surf, (self.pos[0]+15,self.pos[1]-30))
+        screen.blit(self.health_surf, (self.pos[0]+E(15),self.pos[1]-E(30)))
         decal_x = DIM_HB[0] - x
-        screen.blit(red_surf, ((self.pos[0]+15+decal_x,self.pos[1]-30)))
+        screen.blit(red_surf, (self.pos[0]+E(15)+decal_x,self.pos[1]-E(30)))
 
     def display_username(self):
         rect = self.text_username.get_rect()
-        rect.center = (int(self.pos[0] + self.dim[0]/2), self.pos[1]- 50)
+        rect.center = (int(self.pos[0] + self.dim[0]/2), self.pos[1]- E(50))
         screen.blit(self.text_username, rect)
 
     def display(self):

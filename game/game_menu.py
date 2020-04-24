@@ -2,26 +2,30 @@ from base import TextBox, Button, C, Font, dim
 from .player import Player
 from .weapons import AK, M4, Sniper, Bazooka
 from random import randint
+from helper import scale
 import pygame
 
-cposx = lambda pos: dim.center_x - int(pos[0]/2)
+E = lambda x: int(x*dim.f) 
+cposx = lambda pos: (dim.center_x - int(pos[0]/2))/dim.f
 
-DIM_TITLE = (1200,120)
-POS_TITLE = (cposx(DIM_TITLE), 150)
-DIM_MAIN_B = (200,100)
-DIM_TEXT = (800, 80)
-POS_TW = (cposx(DIM_TEXT),300)
-POS_BSTART = (cposx(DIM_MAIN_B), 800)
-DIM_BCHOOSEW = (200,200)
-POS_BCWY = 400
-POS_BCWX = dim.center_x - 550
+DIM_TITLE = scale((1200,120), dim.f)
+POS_TITLE = scale((cposx(DIM_TITLE), 150), dim.f)
+DIM_MAIN_B = scale((200,100), dim.f)
+DIM_TEXT = scale((800, 80), dim.f)
+POS_TW = scale((cposx(DIM_TEXT),300), dim.f)
+POS_BSTART = scale((cposx(DIM_MAIN_B), 800), dim.f)
+DIM_BCHOOSEW = scale((200,200), dim.f)
+POS_BCWY = scale(400, dim.f)
+POS_BCWX = dim.center_x - E(550)
+DIM_PLAYER = scale((100,100), dim.f)
+
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
-img_ak = pygame.image.load(fpath+'ak.png')
-img_m4 = pygame.image.load(fpath+'m4.png')
-img_sniper = pygame.image.load(fpath+'sniper.png')
-img_bazooka = pygame.image.load(fpath+'bazooka.png')
+img_ak = pygame.image.load('game/imgs/ak.png')
+img_m4 = pygame.image.load('game/imgs/m4.png')
+img_sniper = pygame.image.load('game/imgs/sniper.png')
+img_bazooka = pygame.image.load('game/imgs/bazooka.png')
 
 class GameMenu:
     ready = False
@@ -40,11 +44,11 @@ class GameMenu:
         cls.text_are_ready = TextBox(DIM_TEXT, C.WHITE, POS_TW, '0/n players ready', font=Font.f50)
         cls.button_ak = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX, POS_BCWY),'',
                             font=Font.f70,image=img_ak)
-        cls.button_m4 = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+300, POS_BCWY),'',
+        cls.button_m4 = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(300), POS_BCWY),'',
                             font=Font.f70,image=img_m4)
-        cls.button_sniper = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+600, POS_BCWY),'',
+        cls.button_sniper = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(600), POS_BCWY),'',
                             font=Font.f70,image=img_sniper)
-        cls.button_bazooka = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+900, POS_BCWY),'',
+        cls.button_bazooka = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(900), POS_BCWY),'',
                             font=Font.f70,image=img_bazooka)
         cls.n_players = cls.client.n_env_users
         # now the scope cursor is diplayed
@@ -62,7 +66,7 @@ class GameMenu:
         is_client = False
         if username == cls.client.username:
             is_client = True
-        player = Player(char, (100,100), username, is_client=is_client)
+        player = Player(char, DIM_PLAYER, username, is_client=is_client)
         
         if weapon == 'ak':
             player.set_weapon(AK())

@@ -1,16 +1,20 @@
-from base import TextBox, InputText, Button, Cadre, C, Font
+from base import TextBox, InputText, Button, Cadre, C, Font, dim
+from helper import scale
 import pygame
 
-DIM_DFR_B = (100,60)
+DIM_DFR_B = scale((100,60), dim.f)
+DIM_TY = scale(60,dim.f)
+MARGE = scale(200,dim.f)
+LMARGE = int(MARGE/2)
 
 class FriendDemand:
     def __init__(self, x_dim, pos, username):
         self.pos = pos
         self.username = username
         text = f'Friend demand: {username}'
-        self.text = TextBox((x_dim-200,60),C.LIGHT_GREY,pos,text,font=Font.f30)
-        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-200,pos[1]),'Yes',font=Font.f30)
-        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-100,pos[1]),'No',font=Font.f30)
+        self.text = TextBox((x_dim-MARGE,DIM_TY),C.LIGHT_GREY,pos,text,font=Font.f30)
+        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-MARGE,pos[1]),'Yes',font=Font.f30)
+        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-LMARGE,pos[1]),'No',font=Font.f30)
 
     def display(self):
         self.text.display()
@@ -22,9 +26,9 @@ class Invitation:
         self.pos = pos
         self.username = username
         text = f'Invitation from: {username}'
-        self.text = TextBox((x_dim-200,60),C.LIGHT_GREY,pos,text,font=Font.f30)
-        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-200,pos[1]),'Yes',font=Font.f30)
-        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-100,pos[1]),'No',font=Font.f30)
+        self.text = TextBox((x_dim-MARGE,DIM_TY),C.LIGHT_GREY,pos,text,font=Font.f30)
+        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-MARGE,pos[1]),'Yes',font=Font.f30)
+        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-LMARGE,pos[1]),'No',font=Font.f30)
 
     def display(self):
         self.text.display()
@@ -64,7 +68,11 @@ class Friend:
 
 NORMAL = 0
 ADD_FR = 1
-DIM_B = (120,60)
+DIM_B = scale((120,60), dim.f)
+DIM_BADD = scale((200,60),dim.f)
+E = lambda x: int(x*dim.f) 
+DIM_LTB = scale((400,80), dim.f)
+DIM_STB = scale((300,80), dim.f)
 
 class Friends:
     state = NORMAL
@@ -73,31 +81,31 @@ class Friends:
     invs = []
     def __init__(self, dim, pos, client):
         self.dim = dim
-        self.pos = (pos[0],pos[1]+60) # update pos to don't care about 'add friend' button
+        self.pos = (pos[0],pos[1]+DIM_TY) # update pos to don't care about 'add friend' button
         self.client = client
         self.usernames = []
         self.obj_friends = []
-        self.DIM_FR = (dim[0],60)
-        self.cadre = Cadre((dim[0],dim[1]-60), C.WHITE, (pos[0],pos[1]+60))
+        self.DIM_FR = (dim[0],DIM_TY)
+        self.cadre = Cadre((dim[0],dim[1]-DIM_TY), C.WHITE, (pos[0],pos[1]+DIM_TY))
         # state normal
-        self.button_add = Button((200,60),C.LIGHT_BLUE,
-            (pos[0]+dim[0]-200,pos[1]),'Add friend',font=Font.f30)
+        self.button_add = Button(DIM_BADD,C.LIGHT_BLUE,
+            (pos[0]+dim[0]-MARGE,pos[1]),'Add friend',font=Font.f30)
         # state add fr
-        POS_TEXT = (self.pos[0]+20,self.pos[1]+40)
-        self.text_add = TextBox((400,80),C.WHITE, POS_TEXT,
+        POS_TEXT = (self.pos[0]+E(20),self.pos[1]+2*E(20))
+        self.text_add = TextBox(DIM_LTB,C.WHITE, POS_TEXT,
                     'Send demand to someone',font=Font.f30)
-        self.textin_add = TextBox((300, 80), C.WHITE, (POS_TEXT[0],POS_TEXT[1]+100),
+        self.textin_add = TextBox(DIM_STB, C.WHITE, (POS_TEXT[0],POS_TEXT[1]+E(100)),
                     'Enter username:',font=Font.f30)
-        self.input_add = InputText((400, 80), (POS_TEXT[0]+300,POS_TEXT[1]+100),C.WHITE)
+        self.input_add = InputText(DIM_LTB, (POS_TEXT[0]+E(300),POS_TEXT[1]+E(100)),C.WHITE)
         self.button_done = Button(DIM_B, C.LIGHT_BLUE, 
-                    (self.pos[0]+self.dim[0]-140,self.pos[1]+self.dim[1]-140),'Done',font=Font.f30)
+                    (self.pos[0]+self.dim[0]-E(140),self.pos[1]+self.dim[1]-E(140)),'Done',font=Font.f30)
         self.button_cancel = Button(DIM_B, C.LIGHT_BLUE, 
-                    (self.pos[0]+20,self.pos[1]+self.dim[1]-140),'Cancel',font=Font.f30)
+                    (self.pos[0]+E(20),self.pos[1]+self.dim[1]-E(140)),'Cancel',font=Font.f30)
         
 
     def add_friend(self, username, connected):
         i = len(self.obj_friends)
-        new_friend = Friend(self.DIM_FR,(self.pos[0],self.pos[1]+i*60),username, connected)
+        new_friend = Friend(self.DIM_FR,(self.pos[0],self.pos[1]+i*E(60)),username, connected)
         self.obj_friends.append(new_friend)
 
     def check_connected(self):
@@ -115,7 +123,7 @@ class Friends:
         new_friend_demands = self.client.get_demand_fr()
         for fr_d in new_friend_demands:
             current_fr_d = FriendDemand(self.dim[0],
-                    (self.pos[0],self.decal_y*60+self.pos[1]+self.dim[1]-60),fr_d)
+                    (self.pos[0],self.decal_y*E(60)+self.pos[1]+self.dim[1]-E(60)),fr_d)
             self.decal_y += 1
             self.fr_demands.append(current_fr_d)
         
@@ -127,7 +135,7 @@ class Friends:
         # get potential invitation from friends
         for username in self.client.get_invs():
             new_inv = Invitation(self.dim[0],
-                    (self.pos[0],self.decal_y*60+self.pos[1]+self.dim[1]-60),username)
+                    (self.pos[0],self.decal_y*E(60)+self.pos[1]+self.dim[1]-E(60)),username)
             self.decal_y += 1
             self.invs.append(new_inv)
 

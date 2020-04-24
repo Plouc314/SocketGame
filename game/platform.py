@@ -1,17 +1,17 @@
 import pygame
-from base import dim, screen, C
+from base import dim, screen, C, dim
 from .helper import Delayed, Counter, mean
-
+from helper import scale
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
 DIM_TOWER = (400,400)
+E = lambda x: int(x*dim.f) 
+#tower_img = pygame.image.load(fpath+'tower.png')
+#tower_img = pygame.transform.scale(tower_img, DIM_TOWER)
 
-tower_img = pygame.image.load(fpath+'tower.png')
-tower_img = pygame.transform.scale(tower_img, DIM_TOWER)
-
-cursor_img = pygame.image.load(fpath+'cursor.png')
-cursor_img = pygame.transform.scale(cursor_img, (50,50))
+cursor_img = pygame.image.load('game/imgs/cursor.png')
+cursor_img = pygame.transform.scale(cursor_img, (E(50),E(50)))
 
 def display_cursor():
     mouse_pos = pygame.mouse.get_pos()
@@ -73,10 +73,10 @@ class Platform:
                 # check if left or right
                 if abs(self.TOPLEFT[0] - corners[1][0]) > abs(self.TOPRIGHT[0] - corners[0][0]):
                     # player going from right to left
-                    pos = (self.TOPRIGHT[0]+5, corners[0][1])
+                    pos = (self.TOPRIGHT[0]+E(5), corners[0][1])
                 else:
                     # player going from left to right
-                    pos = (self.TOPLEFT[0]-dim_x-5, corners[0][1])
+                    pos = (self.TOPLEFT[0]-dim_x-E(5), corners[0][1])
             else: # re-pos in y
                 # check if up or down
                 if abs(self.TOPLEFT[1] - corners[2][1]) > abs(self.BOTTOMLEFT[1] - corners[0][1]):
@@ -93,15 +93,15 @@ class Platform:
         screen.blit(self.img, self.pos)
 
 
-tower0 = Platform(tower_img, DIM_TOWER, (200,1500), marge=(70,0))
-tower1 = Platform(tower_img, DIM_TOWER, (600,1400), marge=(70,0))
-tower2 = Platform(tower_img, DIM_TOWER, (1000,1300), marge=(70,0))
-
-towers = [tower0, tower1, tower2]
+#tower0 = Platform(tower_img, DIM_TOWER, (200,1500), marge=(70,0))
+#tower1 = Platform(tower_img, DIM_TOWER, (600,1400), marge=(70,0))
+#tower2 = Platform(tower_img, DIM_TOWER, (1000,1300), marge=(70,0))
+#
+#towers = [tower0, tower1, tower2]
 
 class Form(Platform):
     screen = screen
-    MARGE_WIDTH = 20
+    MARGE_WIDTH = E(20)
     def __init__(self, dim, pos, color, hitbox_marge=(0,0)):
         super().__init__(None, dim, pos, hitbox_marge)
         self.surf = pygame.Surface(dim)
@@ -146,17 +146,17 @@ class Form(Platform):
         self.screen.blit(self.surf, self.pos)
         self.display_margin()
 
-DIM_B = 100
+DIM_B = E(100)
 
 blocks = []
 
-block = Form((5*DIM_B, DIM_B),(1000,1400),C.RED)
+block = Form((5*DIM_B, DIM_B),(E(1000),E(1400)),C.RED)
 blocks.append(block)
 
 
-block = Form((3*DIM_B,DIM_B),(1700,1200),C.RED)
+block = Form((3*DIM_B,DIM_B),(E(1700),E(1200)),C.RED)
 blocks.append(block)
 
-block = Form((DIM_B,2*DIM_B),(500,1400),C.GREEN)
+block = Form((DIM_B,2*DIM_B),(E(500),E(1400)),C.GREEN)
 blocks.append(block)
 

@@ -1,12 +1,13 @@
 import pygame
-from base import screen, Font, C
-
+from base import screen, Font, C, dim
+from helper import scale
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
-heart_img = pygame.image.load(fpath+'blood.png')
+heart_img = pygame.image.load('game/imgs/blood.png')
 heart_img = pygame.transform.scale(heart_img, (50,50))
 
-POS_SC = (100,100)
+E = lambda x: int(x*dim.f) 
+POS_SC = scale((100,100), dim.f)
 
 class Score:
     pos = POS_SC
@@ -33,13 +34,13 @@ class Score:
         for u, team in cls.teams.items():
             text = cls.font.render(f'Team {u}',True,C.BLACK)
             screen.blit(text, (POS_SC[0],POS_SC[1]+dy))
-            dy += 100
+            dy += E(100)
             for i, player in enumerate(team['players']):
                 text = cls.font.render(player.username,True,C.BLACK)
                 screen.blit(text, (POS_SC[0],POS_SC[1]+dy))
                 for e in range(team['lives'][i]):
-                    screen.blit(heart_img, (POS_SC[0]+100+e*60,POS_SC[1]+5+dy))
-                dy += 80
+                    screen.blit(heart_img, (POS_SC[0]+E(100)+e*E(60),POS_SC[1]+E(5)+dy))
+                dy += E(80)
     
     @classmethod
     def is_dead(cls, other_player):
@@ -95,7 +96,7 @@ class Score:
     def display_end(cls):
         font = Font.f100
         text = font.render(f'Winner Team {cls.winner}',True,C.BLACK)
-        screen.blit(text, (1200,700))
+        screen.blit(text, (dim.center_x-500,dim.center_y-200))
 
 
         

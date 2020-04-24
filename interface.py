@@ -16,6 +16,7 @@ def set_screen(screen):
     Interface.screen = screen
 
 class Dimension:
+    f = 0.8
     def __init__(self, dim):
         self.window = dim
         self.center_x = int(dim[0]/2)
@@ -23,6 +24,8 @@ class Dimension:
         self.center = (self.center_x, self.center_y)
         self.x = dim[0]
         self.y = dim[1]
+
+E = lambda x: int(x * Dimension.f)
 
 screen = None
 
@@ -38,17 +41,24 @@ class C:
     GREEN = (94,222,70)
 
 class Font:
-    f25 = pygame.font.SysFont("Arial", 25)
-    f30 = pygame.font.SysFont("Arial", 30)
-    f50 = pygame.font.SysFont("Arial", 50)
-    f70 = pygame.font.SysFont("Arial", 70)
-    f100 = pygame.font.SysFont("Arial", 100)
+    f25 = pygame.font.SysFont("Arial", E(25))
+    f30 = pygame.font.SysFont("Arial", E(30))
+    f50 = pygame.font.SysFont("Arial", E(50))
+    f70 = pygame.font.SysFont("Arial", E(70))
+    f100 = pygame.font.SysFont("Arial", E(100))
+    @classmethod
+    def init(cls, factor):
+        cls.f25 = pygame.font.SysFont("Arial", int(25*factor))
+        cls.f30 = pygame.font.SysFont("Arial", int(30*factor))
+        cls.f50 = pygame.font.SysFont("Arial", int(50*factor))
+        cls.f70 = pygame.font.SysFont("Arial", int(70*factor))
+        cls.f100 = pygame.font.SysFont("Arial", int(100*factor))
 
 
 
 class Form(pygame.sprite.Sprite):
     screen = screen
-    MARGE_WIDTH = 4
+    MARGE_WIDTH = E(4)
     def __init__(self, dim, color):
         super().__init__()
         self.surf = pygame.Surface(dim)
@@ -171,7 +181,7 @@ class Button(Form):
         if not self.as_image:
             x_marge, y_marge = center_text(self.dim, self.font, self.text)
             if not self.centered:
-                x_marge = 5
+                x_marge = E(5)
             font_text = self.font.render(self.text,True,self.TEXT_COLOR)
             self.screen.blit(font_text,(self.pos[0]+x_marge,self.pos[1]+y_marge))
         else:
@@ -207,7 +217,7 @@ class TextBox(Form):
         for i, line in enumerate(self.lines):
             x_marge, y_marge = center_text((self.dim[0],y_line), self.font, line)
             if not self.centered:
-                x_marge = 5
+                x_marge = E(5)
             font_text = self.font.render(line,True,self.TEXT_COLOR)
             self.screen.blit(font_text,(self.pos[0]+x_marge,self.pos[1]+i*y_line+y_marge))
 
@@ -285,13 +295,13 @@ class InputText(Button):
         width, height = self.font.size(self.text)
         x_marge, y_marge = center_text(self.dim, self.font, self.text)
         if not self.centered:
-            x_marge = 5
+            x_marge = E(5)
 
         bottom_pos = (self.TOPLEFT[0] + x_marge + width, self.BOTTOMLEFT[1]-y_marge)
         top_pos = (self.TOPLEFT[0] + x_marge + width, self.TOPLEFT[1]+y_marge)
         
         if self.bool_cursor:
-            pygame.draw.line(self.screen, C.BLACK, top_pos, bottom_pos, 2)
+            pygame.draw.line(self.screen, C.BLACK, top_pos, bottom_pos, E(2))
         self.change_cursor_state()
 
     @cursor_deco
