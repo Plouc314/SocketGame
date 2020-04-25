@@ -1,10 +1,11 @@
 import pygame
 from base import screen, Font, C, dim
-from helper import scale
+from helper import scale, timer
+from time import sleep
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 heart_img = pygame.image.load('game/imgs/blood.png')
-heart_img = pygame.transform.scale(heart_img, (50,50))
+heart_img = pygame.transform.scale(heart_img, scale((50,50), dim.f))
 
 E = lambda x: int(x*dim.f) 
 POS_SC = scale((100,100), dim.f)
@@ -15,6 +16,8 @@ class Score:
     winner = 0
     client_player = None
     client = None
+    ended = False
+
     @classmethod
     def set_teams(cls, teams):
         cls.teams = {}
@@ -47,10 +50,24 @@ class Score:
         for team in cls.teams.values():
             for i, player in enumerate(team['players']):
                 if player is other_player:
-                    team['lives'][i] -= 1
-                    if team['lives'][i] == 0:
-                        team['have_losts'][i] = True
-    
+                    cls.client.game_dead_player(player.username)
+                    
+    @classmethod
+    def check_confirmed_death(cls):
+        for username in cls.client.dead_players:
+            dead_player = cls.get_player(username)
+            for team in cls.teams.values():
+                for i, player in enumerate(team['players']):
+                    if player is dead_player:
+                        player.dead = True
+                        team['lives'][i] -= 1
+                        if team['lives'][i] == 0:
+                            team['have_losts'][i] = True
+                        else:
+                            player.respawn()
+                        
+        cls.client.dead_players = []
+
     @classmethod
     def have_lost(cls, other_player):
         for team in cls.teams.values():
@@ -76,7 +93,7 @@ class Score:
             for i, v in enumerate(cls.losts):
                 if v == False:
                     cls.winner = i
-                    return True
+                    cls.ended = True
         
     @classmethod
     def get_player(cls, username):
@@ -86,10 +103,11 @@ class Score:
 
     @classmethod
     def react_events(cls):
+        cls.check_confirmed_death()
         for comm in cls.client.game_msgs:
             username = comm['username']
             player = cls.get_player(username)
-            player.react_events_server(comm['angle'], comm['fire'], comm['left'], comm['right'], comm['jump'])
+            player.react_events_server(comm)
         cls.client.game_msgs = []
 
     @classmethod

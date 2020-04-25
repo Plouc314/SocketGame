@@ -24,7 +24,7 @@ class Player:
     orien = 0
     weapon = None
     SPEED = E(15)
-    POWER_JUMP = math.sqrt(E(150))
+    POWER_JUMP = math.sqrt(150)
     POS_W = scale((50,100), dim.f)
     dim = DIM_P
     SPAWN_POS = (100,100)
@@ -86,34 +86,41 @@ class Player:
     def react_events_client(self, pressed, events):
         self.orien = self.get_angle()
         fire, left, right, jump = 0,0,0,0
-        self.weapon.rotate(self.orien)
-        self.weapon.update()
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.weapon.fire(self.orien, self.username)
                 fire = 1
+
         if pressed[pygame.K_a]:
-            self.move_left()
             left = 1
-        elif pressed[pygame.K_d]:
-            self.move_right()
+            self.move_left()
+
+        if pressed[pygame.K_d]:
             right = 1
-        if pressed[pygame.K_SPACE]:
+            self.move_right()
+
+        if pressed[pygame.K_SPACE] and self.can_jump:
             jump = 1
         self.client.env_game(self.orien, fire, left, right, jump)
-        self.check_jump_client(pressed)
-
-    def react_events_server(self, angle, fire, left, right, jump):
-        self.orien = angle
         self.weapon.rotate(self.orien)
         self.weapon.update()
-        if fire:
-            self.weapon.fire(self.orien, self.username)
-        if left:
+        self.check_jump_client(pressed)
+
+    def react_events_server(self, comm):
+        try:
+            self.orien = comm['angle']
+            self.weapon.rotate(self.orien)
+            self.weapon.update()
+        except: pass
+        if 'fire' in comm.keys():
+            self.weapon.fire(self.orien, self.username, from_server=True)
+        
+        if comm['left']:
             self.move_left()
-        elif right:
+        if comm['right']:
             self.move_right()
-        self.check_jump_server(jump)
+        
+        self.check_jump_server(comm)
             
     def check_jump_client(self, pressed):
         if pressed[pygame.K_SPACE] and self.can_jump:
@@ -122,8 +129,8 @@ class Player:
             return True
         return False
 
-    def check_jump_server(self, jump):
-        if jump and self.can_jump:
+    def check_jump_server(self, comm):
+        if 'jump' in comm.keys() and self.can_jump:
             self.dh = -self.POWER_JUMP
             self.can_jump = False
             return True
@@ -162,15 +169,13 @@ class Player:
 
     def update(self, Score):
         # gravity
-        self.y = self.pos[1] + int(1/2*self.dh*abs(self.dh))
+        self.y = self.pos[1] + E(int(1/2*self.dh*abs(self.dh)))
         self.dh += 1
 
         # check if player is dead
         if self.health <= 0:
-            self.dead = True
+            self.health = 1 # temporary set a health -> waiting for the death confirmation
             Score.is_dead(self)
-            if not Score.have_lost(self):
-                self.respawn()
 
     def collision_bordure(self):
         # check screen bordure

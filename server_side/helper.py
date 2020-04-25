@@ -1,3 +1,13 @@
+from time import time
+
+def timer(func):
+    def inner(*args, **kwargs):
+        start = time()
+        result = func(*args, **kwargs)
+        print('{}: {:.5f}s'.format(func.__name__, time()-start))
+        return result
+    return inner
+
 def cumsum(array, r, separator=''):
     if type(r) == str:
         f = lambda x: str(x)

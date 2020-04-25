@@ -2,8 +2,11 @@ import pygame
 import math
 from base import dim, screen, C
 from .helper import Delayed, Counter
+from helper import scale
 
-DIM_W = (140,140)
+E = lambda x: int(x*dim.f) 
+
+DIM_W = scale((140,140), dim.f)
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
@@ -40,8 +43,8 @@ class Weapon:
         self.rect = self.img.get_rect()
         self.rect.center = (x, y) 
 
-    def fire(self, orien, username):
-        if not self.delayed:
+    def fire(self, orien, username, from_server=False):
+        if not self.delayed or from_server:
             new_bullet = Bullet(self.s_bullets, self.rect.center, self.v_bullets, orien,
                      username=username, damage=self.damage)
             BulletSystem.bullets.append(new_bullet)
@@ -62,7 +65,7 @@ class AK(Weapon):
     img = original_img
     rect = img.get_rect()
     v_bullets = 80
-    s_bullets = (10,10)
+    s_bullets = scale((10,10), dim.f)
     damage = 15
     firing_rate = 3
     def __init__(self):
@@ -74,7 +77,7 @@ class M4(Weapon):
     img = original_img
     rect = img.get_rect()
     v_bullets = 80
-    s_bullets = (10,10)
+    s_bullets = scale((10,10), dim.f)
     damage = 15
     firing_rate = 3
     def __init__(self):
@@ -85,7 +88,7 @@ class Sniper(Weapon):
     img = original_img
     rect = img.get_rect()
     v_bullets = 100
-    s_bullets = (15, 15)
+    s_bullets = scale((15, 15), dim.f)
     damage = 60
     firing_rate = 30
     def __init__(self):
@@ -96,7 +99,7 @@ class Bazooka(Weapon):
     img = original_img
     rect = img.get_rect()
     v_bullets = 30
-    s_bullets = (30, 30)
+    s_bullets = scale((30, 30), dim.f)
     damage = 100
     firing_rate = 30
     def __init__(self):

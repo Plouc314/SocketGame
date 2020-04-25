@@ -196,7 +196,12 @@ class Menu:
 
 
     def run(self, events, pressed):
-        if self.state == 'main':
+        if self.state == 'in game':
+            if not self.client.in_game:
+                if not self.client.in_env:
+                    self.state = 'logged'
+            run_game(pressed, events)
+        elif self.state == 'main':
             self.display_main()
             self.react_events_main(events, pressed)
         elif self.state == 'login':
@@ -211,11 +216,12 @@ class Menu:
         elif self.state == 'env':
             self.display_env()
             self.react_events_env(events, pressed)
+            if not self.client.in_env:
+                self.state = 'logged'
         elif self.state == 'fail log':
             self.display_faillog()
             self.react_events_login(events, pressed)
         elif self.state == 'fail sign':
             self.display_failsign()
             self.react_events_signup(events, pressed)
-        elif self.state == 'in game':
-            run_game(pressed, events)
+        

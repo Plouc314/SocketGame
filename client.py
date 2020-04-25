@@ -1,17 +1,17 @@
 import socket
 from time import sleep
+from helper import split_list
 
 HEADER = 64
 PORT = 5050 #44778
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = '127.0.1.1'
+SERVER = '192.168.1.122'
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
-    
 
 class Client:
     client = client
@@ -21,10 +21,12 @@ class Client:
     ready_users = []
     game_msgs = []
     invs = []
+    dead_players = []
     is_del_fr = False
     in_env = False
     env_users = None
     in_game = False
+    angle_delay = 0
     def __init__(self):
         self.logged = False
         self.connected = True
@@ -62,6 +64,7 @@ class Client:
         self.logged = False
         self.connected = False
         self.send(DISCONNECT_MESSAGE)
+        client.close()
 
     def loop_msg(self):
         while self.logged:
@@ -71,7 +74,10 @@ class Client:
                     print(f'[SERVER] {msg}')
                 msg = msg.split('|')
                 # check to know type of msg
-                if msg[0] == 'chat': # chat msg
+                # env msgs
+                if msg[0] == 'env':
+                    self.handeln_env(msg)
+                elif msg[0] == 'chat': # chat msg
                     username = msg[1]
                     content = msg[2]
                     self.chat_msgs.append((username, content))
@@ -89,25 +95,43 @@ class Client:
                     self.is_del_fr = True
                 elif msg[0] == 'inv':
                     self.invs.append(msg[1])
-                # env msgs
-                elif msg[0] == 'env':
-                    if not self.in_game:
-                        if msg[1] == 'conn':
-                            self.in_env = True
-                            self.env_users = msg[2:]
-                            self.n_env_users = len(self.env_users) + 1
-                        elif msg[1] == 'ready':
-                            self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
-                        elif msg[1] == 'team':
-                            self.team = int(msg[2])
-                    else:
-                        username = msg[1]
-                        angle = float(msg[2])
-                        fire = int(msg[3])
-                        left = int(msg[4])
-                        right = int(msg[5])
-                        jump = int(msg[6])
-                        self.game_msgs.append({'username':username, 'angle':angle, 'fire':fire, 'left':left, 'right':right, 'jump':jump})
+                                    
+    def handeln_env(self, msg):
+        if not self.in_game:
+            if msg[1] == 'conn':
+                self.in_env = True
+                self.env_users = msg[2:]
+                self.n_env_users = len(self.env_users) + 1
+            elif msg[1] == 'stop':
+                self.in_env, self.in_game = False, False
+            elif msg[1] == 'ready':
+                self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
+            elif msg[1] == 'team':
+                self.team = int(msg[2])
+        else:
+            if msg[1] == 'dead':
+                self.dead_players.append(msg[2])
+            elif msg[1] == 'stop':
+                self.in_env, self.in_game = False, False
+            else:
+                msg = msg[1:]
+                infos = split_list('u', msg)
+                for current_msg in infos:
+                    if current_msg[0] != self.username:
+                        # for each player get each transmitted info
+                        d = {'username':current_msg[0]}
+                        for info in current_msg[1:]:
+                            if info[0] == 'a':
+                                d['angle'] = float(info[1:])
+                            elif info[0] == 'f':
+                                d['fire'] = True
+                            elif info[0] == 'l':
+                                d['left'] = int(info[1])
+                            elif info[0] == 'r':
+                                d['right'] = int(info[1])
+                            elif info[0] == 'j':
+                                d['jump'] = True
+                        self.game_msgs.append(d)
 
     def send_chat_msg(self, msg):
         self.send(f'chat|{msg}')
@@ -180,4 +204,20 @@ class Client:
         self.send(f'env|ready|{weapon}|{char}|{self.team}')
     
     def env_game(self, angle, fire, left, right, jump):
-        self.send(f'env|{self.username}|{angle:.2f}|{fire}|{left}|{right}|{jump}')
+        msg = 'env'
+        
+        self.angle_delay += 1
+        if self.angle_delay == 3:
+            self.angle_delay = 0
+            msg += f'|a{angle:.2f}'
+        msg += f'|l{left}'
+        msg += f'|r{right}'
+        if fire:
+            msg += '|f'
+        if jump:
+            msg += '|j'
+        
+        self.send(msg)
+
+    def game_dead_player(self, username):
+        self.send(f'env|dead|{username}')

@@ -16,7 +16,7 @@ def set_screen(screen):
     Interface.screen = screen
 
 class Dimension:
-    f = 0.8
+    f = 0.6
     def __init__(self, dim):
         self.window = dim
         self.center_x = int(dim[0]/2)

@@ -7,8 +7,7 @@ fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
 DIM_TOWER = (400,400)
 E = lambda x: int(x*dim.f) 
-#tower_img = pygame.image.load(fpath+'tower.png')
-#tower_img = pygame.transform.scale(tower_img, DIM_TOWER)
+
 
 cursor_img = pygame.image.load('game/imgs/cursor.png')
 cursor_img = pygame.transform.scale(cursor_img, (E(50),E(50)))

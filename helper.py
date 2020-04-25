@@ -1,5 +1,28 @@
 import pygame
 
+from time import time
+
+def timer(func):
+    def inner(*args, **kwargs):
+        start = time()
+        result = func(*args, **kwargs)
+        print('{}: {:.2f}s'.format(func.__name__, time()-start))
+        return result
+    return inner
+
+def split_list(delimiter, x):
+    s_list = []
+    cursor = 1
+    for i, v in enumerate(x):
+        if v == delimiter:
+            if i != 0:
+                new_list = x[cursor:i]
+                s_list.append(new_list)
+                cursor = i + 1
+    last_list = x[cursor:]
+    s_list.append(last_list)
+    return s_list
+
 class Delayed:
     '''
     Creates decorators,

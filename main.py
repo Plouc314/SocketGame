@@ -2,6 +2,7 @@ from base import Interface, InputText
 from menu import Menu
 from client import Client
 import pygame
+import sys
 
 pygame.init()
 
@@ -16,3 +17,4 @@ while inter.running:
     menu.run(events, pressed)
 
 menu.client.stop()
+sys.exit()

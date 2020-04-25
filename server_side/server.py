@@ -2,7 +2,7 @@ import socket
 import threading
 import pandas as pd
 from time import sleep
-from helper import cumsum, filt
+from helper import cumsum, filt, timer
 
 HEADER = 64
 PORT = 5050 #44778 
@@ -12,7 +12,11 @@ FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)
+try:
+    server.bind(ADDR)
+except:
+    print('Port already used')
+    quit()
 
 clients = []
 
@@ -75,7 +79,8 @@ class Client:
         self.connected = True
         self.logged = False
         self.chat_current_msg = None
-        self.env_msgs = []
+        self.env_msgs = None
+        self.game_dead_players = {}
         self.current_demand = None
     
     def log(self, username, password):
@@ -171,15 +176,7 @@ class Client:
         while self.connected:
             msg = receive_msg(self.conn)
             if msg:
-                if msg == DISCONNECT_MESSAGE:
-                    # disconnect
-                    self.connected = False
-                    if self.logged:
-                        Interaction.disconn_friend(self)
-                    clients.remove(self)
-                    print(f"[{self.addr}] {msg}")
-                    break
-
+                
                 if not self.logged:
                     print(f"[{self.addr}] {msg}")
                     state, username, password = msg.split('|')
@@ -194,17 +191,19 @@ class Client:
                     else:
                         print(f'[{self.username}] {msg}')
                     msg = msg.split('|')
-                    if msg[0] == 'disconn':
+                    # env msg 
+                    if msg[0] == 'env':
+                        if msg[1] == 'play':
+                            self.when_play()
+                        elif msg[1] == 'dead':
+                            self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
+                        else:
+                            self.env_msgs = msg[1:]
+                    elif msg[0] == 'disconn':
                         Interaction.disconn_friend(self)
                         self.logged = False
                         # send to client to interrupt inf loop
                         send(self.conn, 'disconn') 
-                    # env msg 
-                    elif msg[0] == 'env':
-                        if msg[1] == 'play':
-                            self.when_play()
-                        else:
-                            self.env_msgs.append(msg[1:])
                     # chat message
                     elif msg[0] == 'chat': 
                         self.chat_current_msg = msg[1]
@@ -227,6 +226,19 @@ class Client:
                     elif msg[0] == 'rinv':
                         self.create_env(msg[1])
 
+                if msg == DISCONNECT_MESSAGE:
+                    # disconnect
+                    if self.in_env:
+                        self.env.clients.remove(self)
+                        print('stop env')
+                        self.env.stop()
+                    self.connected = False
+                    if self.logged:
+                        Interaction.disconn_friend(self)
+                    clients.remove(self)
+                    print(f"[{self.addr}] {msg}")
+                    break
+
                     
         self.conn.close()
 
@@ -240,6 +252,7 @@ class Env:
         self.clients[1].team = 1
         ###
         self.usernames = list(usernames)
+        self.n_clients = len(self.clients)
         self.ready_players = []
         # send to clients that there in an env
         for client in self.clients:
@@ -251,40 +264,89 @@ class Env:
         run_thread = threading.Thread(target=self.run)
         run_thread.start()
     
+    def stop(self):
+        print('stopping...')
+        self.active = False
+        for client in self.clients:
+            send(client.conn, f'env|stop')
+
     def run(self):
         while self.active:
-            sleep(0.01)
-            msgs = {}
-            # get clients msgs
-            for client in self.clients:
-                msgs[client.username] = client.env_msgs
-                client.env_msgs = []
+            self.body()
+
+    def body(self):
+        sleep(0.03)
             
-            if self.in_game:
-                # send msgs to clients
-                for username, list_current_msgs in msgs.items():
-                    for current_msgs in list_current_msgs:
+        msgs = self.get_frame_msgs()
+        
+        if self.in_game:
+            # send msgs to clients
+            msg = self.build_frame_msg(msgs)
+            if msg != 'env':
+                for client in self.clients:
+                    send(client.conn, msg)
+            
+            self.check_dead_players()
+            
+        else:
+            for username, current_msgs in msgs.items():
+                if current_msgs:
+                    if current_msgs[0] == 'ready':
+                        weapon = current_msgs[1]
+                        char = current_msgs[2]
+                        team = current_msgs[3]
                         for client in self.clients:
-                            if client.username != username:
-                                current_msgs = '|'.join(current_msgs)
-                                send(client.conn, f'env|{current_msgs}')
-            else:
-                
-                for username, list_current_msgs in msgs.items():
-                    for current_msgs in list_current_msgs:
-                        if current_msgs[0] == 'ready':
-                            weapon = current_msgs[1]
-                            char = current_msgs[2]
-                            team = current_msgs[3]
-                            for client in self.clients:
-                                if username != client.username:
-                                    send(client.conn, f'env|ready|{username}|{weapon}|{char}|{team}')
-                            d = {'username':username,'weapon':weapon,'char':char,'team':team}
-                            self.ready_players.append(d)
-                
-                if len(self.ready_players) == len(self.clients):
-                    self.in_game = True
-                            
+                            if username != client.username:
+                                send(client.conn, f'env|ready|{username}|{weapon}|{char}|{team}')
+                        d = {'username':username,'weapon':weapon,'char':char,'team':team}
+                        self.ready_players.append(d)
+            
+            if len(self.ready_players) == len(self.clients):
+                self.in_game = True
+
+    def check_dead_players(self):
+        # check for dead player
+        dead_players = {}
+        info_to_pop = []
+        for client in self.clients:
+            for username in client.game_dead_players.keys():
+                if not username in dead_players.keys():
+                    dead_players[username] = 1
+                else:
+                    dead_players[username] += 1
+                # reduce lifetime of infos
+                client.game_dead_players[username] -= 1
+                if client.game_dead_players[username] == 0:
+                    info_to_pop.append([client, username])
+        
+        for client, username in info_to_pop:
+            client.game_dead_players.pop(username)
+
+        # if every player send death -> confirm death
+        for username, n_msg in dead_players.items():
+            if n_msg == self.n_clients:
+                for client in self.clients:
+                    send(client.conn, f'env|dead|{username}')
+                    try:
+                        client.game_dead_players.pop(username)
+                    except: pass
+
+
+    def get_frame_msgs(self):
+        msgs = {}
+        # get clients msgs
+        for client in self.clients:
+            if client.env_msgs:
+                msgs[client.username] = client.env_msgs
+                client.env_msgs = None
+        return msgs
+    
+    def build_frame_msg(self, msgs):
+        msg = 'env'
+        for username, current_msgs in msgs.items():
+            current_msg = f'u|{username}|' + '|'.join(current_msgs)
+            msg += '|'+current_msg
+        return msg  
 
 
 class Interaction:
@@ -296,7 +358,7 @@ class Interaction:
     @classmethod
     def run(cls):
         while 1:
-            sleep(.1)
+            sleep(.5)
             
             # check that clients are connected
             for client in cls.clients:
