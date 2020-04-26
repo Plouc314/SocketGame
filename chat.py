@@ -51,7 +51,7 @@ class Chat:
             self.input_text.text = ''
             self.client.send_chat_msg(msg)
             self.add_msg(self.client.username, msg)
-            #self.add_msg('bob', msg)
+            
         
         for content in self.client.chat_msgs:
             self.add_msg(content[0], content[1])

@@ -16,7 +16,7 @@ def set_screen(screen):
     Interface.screen = screen
 
 class Dimension:
-    f = 0.6
+    f = 1
     def __init__(self, dim):
         self.window = dim
         self.center_x = int(dim[0]/2)
@@ -34,11 +34,13 @@ class C:
     BLACK = (0,0,0)
     LIGHT_BLUE = (135,206,250)
     BLUE = (65,105,225)
+    DARK_BLUE = (7, 19, 134)
     LIGHT_GREY = (200,200,200)
     LIGHT_RED = (255, 80, 80)
     RED = (225, 50, 50)
     LIGHT_GREEN = (124,252,100)
     GREEN = (94,222,70)
+    LIGHT_BROWN = (225, 167, 69)
 
 class Font:
     f25 = pygame.font.SysFont("Arial", E(25))
@@ -105,6 +107,10 @@ class Form(pygame.sprite.Sprite):
         self.TOPRIGHT = (pos[0]+dim[0],pos[1])
         self.BOTTOMLEFT = (pos[0], pos[1]+dim[1])
         self.BOTTOMRIGHT = (pos[0]+dim[0],pos[1]+dim[1])
+
+    def set_pos(self, pos):
+        self.pos = pos
+        self.set_corners(pos, self.dim)
 
 def center_text(dim_box, font, text):
     width, height = font.size(text)

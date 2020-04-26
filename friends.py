@@ -68,6 +68,7 @@ class Friend:
 
 NORMAL = 0
 ADD_FR = 1
+FAIL = 2
 DIM_B = scale((120,60), dim.f)
 DIM_BADD = scale((200,60),dim.f)
 E = lambda x: int(x*dim.f) 
@@ -101,7 +102,9 @@ class Friends:
                     (self.pos[0]+self.dim[0]-E(140),self.pos[1]+self.dim[1]-E(140)),'Done',font=Font.f30)
         self.button_cancel = Button(DIM_B, C.LIGHT_BLUE, 
                     (self.pos[0]+E(20),self.pos[1]+self.dim[1]-E(140)),'Cancel',font=Font.f30)
-        
+        # state fail
+        self.text_fail = TextBox(DIM_LTB,C.WHITE, POS_TEXT,
+                    'Invalid username',font=Font.f50, TEXT_COLOR=C.RED)
 
     def add_friend(self, username, connected):
         i = len(self.obj_friends)
@@ -146,6 +149,8 @@ class Friends:
             self.react_events_normal(events, pressed)
         elif self.state == ADD_FR:
             self.react_events_addfr(events, pressed)
+        elif self.state == FAIL:
+            self.react_events_fail(events, pressed)
 
     def react_events_normal(self, events, pressed):
         self.react_events_frd(events, pressed)
@@ -166,7 +171,13 @@ class Friends:
         if self.button_done.pushed(events):
             username = self.input_add.text
             self.client.demand_friend(username)
-            self.state = NORMAL
+            
+        if self.client.is_dfr_valid != None: # receive a response
+            if self.client.is_dfr_valid:
+                self.state = NORMAL
+            else:
+                self.state = FAIL
+            self.client.is_dfr_valid = None
 
     def react_events_frd(self, events, pressed):
         for frd in self.fr_demands:
@@ -188,6 +199,11 @@ class Friends:
             if inv.button_no.pushed(events):
                 self.invs.remove(inv)
                 self.decal_y -= 1
+    
+    def react_events_fail(self, events, pressed):
+        if self.button_done.pushed(events):
+            self.state = NORMAL
+            self.input_add.text = ''
 
     def del_friend(self, friend):
         self.obj_friends = []
@@ -205,6 +221,8 @@ class Friends:
             self.display_normal()
         elif self.state == ADD_FR:
             self.display_addfr()
+        elif self.state == FAIL:
+            self.display_fail()
 
     def display_normal(self):
         self.button_add.display()
@@ -224,6 +242,10 @@ class Friends:
         self.button_done.display()
         self.button_cancel.display()
     
+    def display_fail(self):
+        self.button_done.display()
+        self.text_fail.display()
+
     def get_obj_friend(self, username):
         for obj in self.obj_friends:
             if obj.username == username:

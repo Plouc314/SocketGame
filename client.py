@@ -22,11 +22,11 @@ class Client:
     game_msgs = []
     invs = []
     dead_players = []
+    is_dfr_valid = None
     is_del_fr = False
     in_env = False
     env_users = None
     in_game = False
-    angle_delay = 0
     def __init__(self):
         self.logged = False
         self.connected = True
@@ -93,6 +93,11 @@ class Client:
                 elif msg[0] == 'delfr': # a friend delete self (you)
                     self.friends.pop(msg[1])
                     self.is_del_fr = True
+                elif msg[0] == 'dfrv': # valid or invalid username in friend demand
+                    if msg[1] == '1':
+                        self.is_dfr_valid = True
+                    else:
+                        self.is_dfr_valid = False
                 elif msg[0] == 'inv':
                     self.invs.append(msg[1])
                                     
@@ -103,7 +108,7 @@ class Client:
                 self.env_users = msg[2:]
                 self.n_env_users = len(self.env_users) + 1
             elif msg[1] == 'stop':
-                self.in_env, self.in_game = False, False
+                self.in_env, self.in_game, self.in_game_session = False, False, False
             elif msg[1] == 'ready':
                 self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
             elif msg[1] == 'team':
@@ -112,7 +117,7 @@ class Client:
             if msg[1] == 'dead':
                 self.dead_players.append(msg[2])
             elif msg[1] == 'stop':
-                self.in_env, self.in_game = False, False
+                self.in_env, self.in_game, self.in_game_session = False, False, False
             else:
                 msg = msg[1:]
                 infos = split_list('u', msg)
@@ -151,8 +156,11 @@ class Client:
             if msg_length:
                 received = True
                 msg_length = int(msg_length)
-                msg = client.recv(msg_length).decode(FORMAT)
-                return msg
+                try:
+                    msg = client.recv(msg_length).decode(FORMAT)
+                    return msg
+                except:
+                    print('[ERROR] failure to receive the message: aborting...')
     
     def disconn(self):
         self.logged = False
@@ -198,6 +206,7 @@ class Client:
         self.send(f'rdfr|{username}|{accepted}')
 
     def env_play(self):
+        self.in_game_session = True
         self.send(f'env|play')
 
     def env_ready(self, weapon, char):
@@ -205,11 +214,7 @@ class Client:
     
     def env_game(self, angle, fire, left, right, jump):
         msg = 'env'
-        
-        self.angle_delay += 1
-        if self.angle_delay == 3:
-            self.angle_delay = 0
-            msg += f'|a{angle:.2f}'
+        msg += f'|a{angle:.2f}'
         msg += f'|l{left}'
         msg += f'|r{right}'
         if fire:
@@ -221,3 +226,6 @@ class Client:
 
     def game_dead_player(self, username):
         self.send(f'env|dead|{username}')
+
+    def quit_game(self):
+        self.send(f'env|quit|{self.username}')

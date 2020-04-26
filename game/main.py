@@ -8,7 +8,8 @@ from helper import timer
 def run(pressed, events):
     
     # first check client player
-    Score.client_player.react_events_client(pressed, events)
+    if not Score.ended:
+        Score.client_player.react_events_client(pressed, events)
     
     for block in blocks:
         block.display()
@@ -16,7 +17,7 @@ def run(pressed, events):
     
     Score.check_win()
     if Score.ended:
-        Score.display_end()
+        Score.run_end(events, pressed)
     else:
         # react to communications from server
         Score.react_events()

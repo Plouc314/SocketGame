@@ -197,8 +197,10 @@ class Menu:
 
     def run(self, events, pressed):
         if self.state == 'in game':
-            if not self.client.in_game:
-                if not self.client.in_env:
+            if not self.client.in_game_session:
+                if self.client.in_env:
+                    self.state = 'env'
+                else:
                     self.state = 'logged'
             run_game(pressed, events)
         elif self.state == 'main':

@@ -91,7 +91,8 @@ class GameMenu:
         cls.client.env_ready(cls.chosen_weapon, cls.character)
         cls.Score.client_player = cls.players[-1]['player']
         cls.Score.client_player.client = cls.client # player must have access to client to send movements
-    
+        cls.Score.client_team = cls.client.team
+
     @classmethod
     def update(cls):
         # check for ready users
