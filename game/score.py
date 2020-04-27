@@ -11,6 +11,8 @@ E = lambda x: int(x*dim.f)
 cposx = lambda pos: (dim.center_x - int(pos[0]/2))/dim.f # will be rescaled after
 cposy = lambda pos: (dim.center_y - int(pos[1]/2))/dim.f # will be rescaled after
 
+TCOLORS = [C.BLUE, C.GREEN, C.PURPLE]
+
 POS_SC = scale((100,100), dim.f)
 DIM_TEXTEND = scale((800, 120), dim.f)
 POS_TEXTEND = scale((cposx(DIM_TEXTEND),cposy(DIM_TEXTEND)), dim.f)
@@ -35,7 +37,9 @@ class Score:
     def set_teams(cls, teams):
         cls.teams = {}
         cls.players = []
+        cls.team_idxs = []
         for i, players in teams.items():
+            cls.team_idxs.append(i)
             lives = [3 for player in players]
             have_losts = [False for player in players]
             d = {'players':players,'lives':lives, 'have_losts':have_losts}
@@ -49,11 +53,13 @@ class Score:
         dy = 0
         for u, team in cls.teams.items():
             cls.text_team.set_text(f'Team {u}')
+            cls.text_team.set_color(TCOLORS[u], marge=True)
             cls.text_team.set_pos((POS_SC[0],POS_SC[1]+dy))
             cls.text_team.display()
             dy += E(100)
             for i, player in enumerate(team['players']):
                 cls.text_player.set_text(player.username)
+                cls.text_player.set_color(TCOLORS[u], marge=True)
                 cls.text_player.set_pos((POS_SC[0],POS_SC[1]+dy))
                 cls.text_player.display()
                 for e in range(team['lives'][i]):
@@ -107,7 +113,7 @@ class Score:
             # get the winner
             for i, v in enumerate(cls.losts):
                 if v == False:
-                    cls.winner = i
+                    cls.winner = cls.team_idxs[i]
                     cls.ended = True
                     cls.text_end.set_text(f'Winner Team {cls.winner}')
                     # set color
@@ -141,7 +147,7 @@ class Score:
         if cls.button_back.pushed(events):
             cls.client.in_game = False
             cls.client.in_game_session = False
-            cls.client.quit_game()
+            cls.client.quit_game_or_env()
             pygame.mouse.set_visible(True)
 
     @classmethod
@@ -149,6 +155,13 @@ class Score:
         cls.text_end.display()
         cls.button_back.display()
 
-
+    @classmethod
+    def reset(cls):
+        cls.winner = 0
+        cls.client_player = None
+        cls.client = None
+        cls.ended = False
+        cls.teams = {}
+        cls.players = []
 
         

@@ -149,13 +149,88 @@ DIM_B = E(100)
 
 blocks = []
 
-block = Form((5*DIM_B, DIM_B),(E(1000),E(1400)),C.RED)
-blocks.append(block)
-
-
-block = Form((3*DIM_B,DIM_B),(E(1700),E(1200)),C.RED)
-blocks.append(block)
-
-block = Form((DIM_B,2*DIM_B),(E(500),E(1400)),C.GREEN)
-blocks.append(block)
-
+#1
+d = (E(300),E(100))
+p = (E(400),E(1300))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#2
+d = (E(200),E(100))
+p = (E(0),E(1000))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#3
+d = (E(200),E(100))
+p = (E(500),E(800))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#4
+d = (E(100),E(200))
+p = (E(700),E(700))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#5
+d = (E(100),E(100))
+p = (E(1300),E(1500))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#6
+d = (E(100),E(200))
+p = (E(1400),E(1400))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#7
+d = (E(400),E(100))
+p = (E(1700),E(500))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#8
+d = (E(100),E(100))
+p = (E(1700),E(400))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#9
+d = (E(400),E(100))
+p = (E(2500),E(800))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#10
+d = (E(700),E(500))
+p = (E(2300),E(1100))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#11
+d = (E(200),E(100))
+p = (E(700),E(400))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#12
+d = (E(300),E(100))
+p = (E(1000),E(200))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#13
+d = (E(100),E(100))
+p = (E(300),E(500))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#14
+d = (E(200),E(100))
+p = (E(2800),E(500))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#15
+d = (E(300),E(100))
+p = (E(2300),E(200))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#16
+d = (E(200),E(200))
+p = (E(2000),E(1400))
+b = Form(d,p, C.RED)
+blocks.append(b)
+#17
+d = (E(100),E(100))
+p = (E(2200),E(1300))
+b = Form(d,p, C.RED)
+blocks.append(b)

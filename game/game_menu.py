@@ -17,7 +17,6 @@ POS_BSTART = scale((cposx(DIM_MAIN_B), 800), dim.f)
 DIM_BCHOOSEW = scale((200,200), dim.f)
 POS_BCWY = scale(400, dim.f)
 POS_BCWX = dim.center_x - E(550)
-DIM_PLAYER = scale((100,100), dim.f)
 
 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
@@ -66,8 +65,7 @@ class GameMenu:
         is_client = False
         if username == cls.client.username:
             is_client = True
-        player = Player(char, DIM_PLAYER, username, is_client=is_client)
-        
+        player = Player(char, username, team,is_client=is_client)
         if weapon == 'ak':
             player.set_weapon(AK())
         elif weapon == 'm4':
@@ -157,3 +155,12 @@ class GameMenu:
         cls.button_bazooka.display()
         if not cls.ready_pushed:
             cls.button_ready.display()
+
+    @classmethod
+    def reset(cls):
+        cls.ready = False
+        cls.chosen_weapon = None
+        cls.character = randint(0,1)
+        cls.as_chosen = False
+        cls.ready_pushed = False
+        cls.players = []

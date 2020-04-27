@@ -103,9 +103,17 @@ class Client:
             other_client.in_env = True
             self.in_env = True
 
-    def when_play(self):
-        # send team to player
-        send(self.conn, f'env|team|{self.team}')
+    def check_env_rinv(self, username):
+        # check other is conn
+        if Interaction.is_connected(username):
+            other_client = Interaction.get_client(username)
+            # check if other client is already in env
+            if other_client.in_env:
+                other_client.env.add_client(self)
+                self.in_env = True
+                self.env = other_client.env
+            else:
+                self.create_env(username)
 
     def run(self):
         while self.connected:
@@ -140,11 +148,16 @@ class Client:
                     # env msg 
                     if msg[0] == 'env':
                         if msg[1] == 'play':
-                            self.when_play()
+                            self.env.is_play()
                         elif msg[1] == 'quit':
-                            self.env.stop_game(self.username)
+                            if self.env.in_game:
+                                self.env.stop_game(self.username) # quit game
+                            else:
+                                self.env.stop() # quit env
                         elif msg[1] == 'dead':
                             self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
+                        elif msg[1] == 'team':
+                            self.env.handeln_team(msg[2:])
                         else:
                             self.env_msgs = msg[1:]
                     elif msg[0] == 'disconn':
@@ -172,9 +185,6 @@ class Client:
                         self.invite_friend(msg[1])
                     # get answer of invitation
                     elif msg[0] == 'rinv':
-                        self.create_env(msg[1])
+                        self.check_env_rinv(msg[1])
 
-                
-
-                    
         self.conn.close()

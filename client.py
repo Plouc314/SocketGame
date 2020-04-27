@@ -22,11 +22,15 @@ class Client:
     game_msgs = []
     invs = []
     dead_players = []
+    team_changes = {}
+    new_env_players = []
+    team_created = False
     is_dfr_valid = None
     is_del_fr = False
     in_env = False
     env_users = None
     in_game = False
+    in_game_session = False
     def __init__(self):
         self.logged = False
         self.connected = True
@@ -104,15 +108,30 @@ class Client:
     def handeln_env(self, msg):
         if not self.in_game:
             if msg[1] == 'conn':
-                self.in_env = True
-                self.env_users = msg[2:]
-                self.n_env_users = len(self.env_users) + 1
+                if not self.in_env:
+                    self.in_env = True
+                    self.env_users = msg[2:]
+                    self.n_env_users = len(self.env_users) + 1
+                else:
+                    # add a new player to the env
+                    self.new_env_players.append(msg[2])
+                    self.env_users.append(msg[2])
+                    self.n_env_users += 1
+
             elif msg[1] == 'stop':
                 self.in_env, self.in_game, self.in_game_session = False, False, False
             elif msg[1] == 'ready':
                 self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
-            elif msg[1] == 'team':
+            elif msg[1] == 'play':
                 self.team = int(msg[2])
+                self.in_game_session = True
+            elif msg[1] == 'team':
+                if msg[2] == 'change':
+                    username = msg[3]
+                    team_idx = int(msg[4])
+                    self.team_changes[username] = team_idx
+                elif msg[2] == 'create':
+                    self.team_created = True
         else:
             if msg[1] == 'dead':
                 self.dead_players.append(msg[2])
@@ -120,23 +139,30 @@ class Client:
                 self.in_env, self.in_game, self.in_game_session = False, False, False
             else:
                 msg = msg[1:]
-                infos = split_list('u', msg)
-                for current_msg in infos:
-                    if current_msg[0] != self.username:
-                        # for each player get each transmitted info
-                        d = {'username':current_msg[0]}
-                        for info in current_msg[1:]:
-                            if info[0] == 'a':
-                                d['angle'] = float(info[1:])
-                            elif info[0] == 'f':
-                                d['fire'] = True
-                            elif info[0] == 'l':
-                                d['left'] = int(info[1])
-                            elif info[0] == 'r':
-                                d['right'] = int(info[1])
-                            elif info[0] == 'j':
-                                d['jump'] = True
-                        self.game_msgs.append(d)
+                try:
+                    self.handeln_game_msg(msg)
+                except:
+                    print("[ERROR] Can't handeln game message")
+                    self.in_env, self.in_game, self.in_game_session = False, False, False
+
+    def handeln_game_msg(self, msg):
+        infos = split_list('u', msg)
+        for current_msg in infos:
+            if current_msg[0] != self.username:
+                # for each player get each transmitted info
+                d = {'username':current_msg[0]}
+                for info in current_msg[1:]:
+                    if info[0] == 'a':
+                        d['angle'] = float(info[1:])
+                    elif info[0] == 'f':
+                        d['fire'] = True
+                    elif info[0] == 'l':
+                        d['left'] = int(info[1])
+                    elif info[0] == 'r':
+                        d['right'] = int(info[1])
+                    elif info[0] == 'j':
+                        d['jump'] = True
+                self.game_msgs.append(d)
 
     def send_chat_msg(self, msg):
         self.send(f'chat|{msg}')
@@ -206,7 +232,6 @@ class Client:
         self.send(f'rdfr|{username}|{accepted}')
 
     def env_play(self):
-        self.in_game_session = True
         self.send(f'env|play')
 
     def env_ready(self, weapon, char):
@@ -227,5 +252,11 @@ class Client:
     def game_dead_player(self, username):
         self.send(f'env|dead|{username}')
 
-    def quit_game(self):
-        self.send(f'env|quit|{self.username}')
+    def quit_game_or_env(self):
+        self.send(f'env|quit')
+    
+    def create_team(self):
+        self.send(f'env|team|create')
+    
+    def send_new_team(self, n):
+        self.send(f'env|team|change|{self.username}|{n}')

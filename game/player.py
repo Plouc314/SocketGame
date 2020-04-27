@@ -14,11 +14,13 @@ chars = [char_1, char_2]
 DIM_P = scale((160,160), dim.f)
 DIM_HB = scale((130, 20), dim.f)
 
+TCOLORS = [C.DARK_BLUE, C.DARK_GREEN, C.DARK_PURPLE]
+
 SMOUSEBUTTONDOWN = 0
 SMOVELEFT = 1
 SMOVERIGHT = 2
 SJUMP = 3
-
+SPAWN_POSITIONS = [(0,E(1300)),(E(2800),E(900)), (E(1200),E(200))]
 
 class Player:
     orien = 0
@@ -27,7 +29,6 @@ class Player:
     POWER_JUMP = math.sqrt(150)
     POS_W = scale((50,100), dim.f)
     dim = DIM_P
-    SPAWN_POS = (100,100)
     dead = False
     client = None
     # gravity
@@ -36,13 +37,15 @@ class Player:
     # health bar
     health_surf = pygame.Surface(DIM_HB)
     health_surf.fill(C.GREEN)
-    def __init__(self, char, pos, username, is_client=False):
+    def __init__(self, char, username, team_idx, is_client=False):
         self.img = chars[char]
         self.img = pygame.transform.scale(self.img, self.dim)
         self.original_img = self.img
         self.username = username
-        self.text_username = Font.f30.render(username,True,C.BLACK)
-        self.pos = list(pos)
+        self.team_idx = team_idx
+        self.SPAWN_POS = SPAWN_POSITIONS[team_idx]
+        self.text_username = Font.f30.render(username,True,TCOLORS[team_idx])
+        self.pos = list(self.SPAWN_POS)
         self.health = 100
         self.set_corners()
         self.is_client = is_client
@@ -88,8 +91,8 @@ class Player:
         fire, left, right, jump = 0,0,0,0
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.weapon.fire(self.orien, self.username)
-                fire = 1
+                as_shot = self.weapon.fire(self.orien, self.username)
+                fire = as_shot
 
         if pressed[pygame.K_a]:
             left = 1

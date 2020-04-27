@@ -41,14 +41,16 @@ class Friend:
     def __init__(self, dim, pos, username, connected):
         self.pos = pos
         self.username = username
+        self.in_game = False
         self.connected = connected
         self.set_colors()
         self.text = TextBox((int(5/8*dim[0]),dim[1]),self.CTEXT, pos, username, font=Font.f30,marge=True)
         self.button_invite = Button((int(1/4*dim[0]),dim[1]),self.CBUTTON,
                             (pos[0]+int(5/8*dim[0]),pos[1]),'Invite',font=Font.f30)
+        self.text_ingame = TextBox((int(1/4*dim[0]),dim[1]), self.CBUTTON,
+                            (pos[0]+int(5/8*dim[0]),pos[1]),'In game', font=Font.f30)
         self.button_delete = Button((int(1/8*dim[0]),dim[1]),C.LIGHT_GREY,
                             (pos[0]+int(7/8*dim[0]),pos[1]),'Del',font=Font.f30)
-
 
     def set_colors(self):
         if self.connected:

@@ -7,6 +7,7 @@ from helper import scale
 center_x = 1500 # base to be rescaled
 
 cposx = lambda pos: (dim.center_x - int(pos[0]/2))/dim.f # will be rescaled after
+E = lambda x: int(x*dim.f) 
 
 DIM_TITLE = scale((600,120), dim.f)
 POS_TITLE = scale((cposx(DIM_TITLE), 150), dim.f)
@@ -29,10 +30,19 @@ POS_BSIGN = (scale(cposx(DIM_MAIN_B), dim.f),POS_TITLE[1]+4*DIM_MAIN_B[1])
 POS_BDONE = scale((center_x+240, 750), dim.f)
 POS_BBACK = scale((100,100), dim.f)
 POS_BPLAY = (scale(cposx(DIM_MAIN_B), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
+DIM_TEAMS = scale((400, 600), dim.f)
+POS_TEAMS = scale((300,250), dim.f)
+DIM_TWAIT = scale((500,60), dim.f)
+POS_TWAIT = (scale(cposx(DIM_TWAIT), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
+DIM_BEXIT = scale((200,80), dim.f)
+POS_BEXIT = (dim.x - E(300), E(100))
 MARGE = scale(100, dim.f)
 LMARGE = scale(50, dim.f)
 
+from teams import Teams
+
 class Menu:
+    play_pushed = False
     def __init__(self, client):
         self.client = client
         self.state = 'main'
@@ -73,11 +83,16 @@ class Menu:
         self.button_play = Button(DIM_MAIN_B, C.LIGHT_BLUE, 
                     POS_BPLAY, 'Play') 
         self.chat_logged = Chat(DIM_CHAT, (MARGE,dim.y-DIM_CHAT[1]-MARGE), self.client)
-        self.friends = Friends(DIM_FR, (dim.x-DIM_FR[0]-MARGE, MARGE), self.client)
+        self.friends = Friends(DIM_FR, (dim.x-DIM_FR[0]-MARGE, E(250)), self.client)
         self.button_disconn = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (LMARGE, MARGE+DIM_LOGINP[1])
                         ,'Disconnect',font=Font.f30)
         # state env
         self.title_env = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Env', font=Font.f100)
+        self.text_wating = TextBox(DIM_TWAIT,C.WHITE, POS_TWAIT,
+                             'Waiting for the other players...', font=Font.f30)
+        self.button_exit = Button(DIM_BEXIT, C.LIGHT_BLUE, POS_BEXIT, 'Exit', font=Font.f30)
+        self.teams = Teams
+        self.teams.init(POS_TEAMS,DIM_TEAMS, client)
 
     def display_main(self):
         self.title_main.display()
@@ -113,10 +128,15 @@ class Menu:
     def display_env(self):
         self.title_env.display()
         self.text_username.display()
-        self.button_play.display()
+        if not self.play_pushed:
+            self.button_play.display()
+        else:
+            self.text_wating.display()
         self.button_disconn.display()
+        self.button_exit.display()
         self.chat_logged.display()
         self.friends.display()
+        self.teams.display()
 
     def display_faillog(self):
         self.display_login()
@@ -143,6 +163,7 @@ class Menu:
             if self.client.log(username, password):
                 self.state = 'logged'
                 self.text_username.set_text(username)
+                self.teams.set_username(username)
                 self.chat_logged.activate()
             else:
                 self.state = 'fail log'
@@ -161,6 +182,7 @@ class Menu:
                 if self.client.sign_up(username, password):
                     self.state = 'logged'
                     self.text_username.set_text(username)
+                    self.teams.set_username(username)
                     self.chat_logged.activate()
                 else:
                     self.state = 'fail sign'
@@ -174,15 +196,25 @@ class Menu:
         self.friends.react_events(events, pressed)
         # check for env 
         if self.client.in_env:
+            self.teams.set_players() # must have receive players connected from server (env)
             self.state = 'env'
-
+        
     def react_events_env(self, events, pressed):
         self.chat_logged.react_events(events, pressed)
+        self.teams.react_events(events, pressed)
         if self.button_disconn.pushed(events):
             self.disconn()
         self.friends.react_events(events, pressed)
-        if self.button_play.pushed(events):
-            self.client.env_play()
+        
+        if not self.play_pushed:
+            if self.button_play.pushed(events):
+                self.client.env_play()
+                self.play_pushed = True
+
+        if self.button_exit.pushed(events):
+            self.client.quit_game_or_env()
+
+        if self.client.in_game_session:
             start_game(self.client)
             self.state = 'in game'
 

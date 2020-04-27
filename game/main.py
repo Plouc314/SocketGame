@@ -31,6 +31,8 @@ def run(pressed, events):
     
 
 def start_game(client):
+    GameMenu.reset()
+    Score.reset()
     GameMenu.init(client, Score)
     Score.client = client
 
@@ -40,3 +42,4 @@ def run_game(pressed, events):
     else:
         run(pressed, events)
     display_cursor()
+

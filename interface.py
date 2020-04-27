@@ -36,11 +36,15 @@ class C:
     BLUE = (65,105,225)
     DARK_BLUE = (7, 19, 134)
     LIGHT_GREY = (200,200,200)
+    XLIGHT_GREY = (230,230,230)
     LIGHT_RED = (255, 80, 80)
     RED = (225, 50, 50)
     LIGHT_GREEN = (124,252,100)
     GREEN = (94,222,70)
+    DARK_GREEN = (17, 159, 26)
     LIGHT_BROWN = (225, 167, 69)
+    DARK_PURPLE = (140, 17, 159)
+    PURPLE = (180, 57, 199)
 
 class Font:
     f25 = pygame.font.SysFont("Arial", E(25))

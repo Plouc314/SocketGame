@@ -49,6 +49,8 @@ class Weapon:
                      username=username, damage=self.damage)
             BulletSystem.bullets.append(new_bullet)
             self.delayed = True
+            return 1 
+        return 0 # the return statement is useful to know if the client player could shot (for the server)
     
     def update(self):
         if self.delayed:
@@ -132,7 +134,10 @@ class BulletSystem:
                 bullet.update()
                 bullet.display()
             else:
-                cls.bullets.remove(bullet)
+                try:
+                    cls.bullets.remove(bullet)
+                except:
+                    print('[ERROR] BulletSystem Error')
 
             # check for collision
             for platform in platforms:
