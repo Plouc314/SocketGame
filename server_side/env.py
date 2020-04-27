@@ -38,14 +38,6 @@ class Env:
         new_client.team = 0
         self.usernames.append(new_client.username)
         self.n_clients += 1
-        
-    def stop(self):
-        self.active = False
-        for client in self.clients:
-            client.in_env = False
-            client.in_game = False
-            client.env = None
-            send(client.conn, f'env|stop')
     
     def stop_game(self, username):
         index = self.usernames.index(username)
@@ -172,5 +164,21 @@ class Env:
             msg += '|'+current_msg
         return msg  
     
+    def quit(self, username):
+        client = Interaction.get_client(username)
+        # update client attributes
+        client.in_env = False
+        client.env = None
+        send(client.conn, f'env|stop')
+        # send to friends: out env
+        Interaction.inform_outenv(client.username)
+        # update env attributes
+        self.clients.remove(client)
+        self.usernames.remove(username)
+        self.n_clients -= 1
+        # check if there is still someone
+        if self.n_clients == 0:
+            self.active = False
+
     def is_play(self):
         self.n_player_game_sess += 1

@@ -2,12 +2,15 @@ import pygame
 from base import dim, screen, C, dim
 from .helper import Delayed, Counter, mean
 from helper import scale
+from random import randint
 
-fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
 DIM_TOWER = (400,400)
 E = lambda x: int(x*dim.f) 
 
+COLORS = [C.BLUE, C.GREEN, C.PURPLE, C.YELLOW, C.RED]
+
+get_color = lambda: COLORS[randint(0,4)]
 
 cursor_img = pygame.image.load('game/imgs/cursor.png')
 cursor_img = pygame.transform.scale(cursor_img, (E(50),E(50)))
@@ -92,12 +95,6 @@ class Platform:
         screen.blit(self.img, self.pos)
 
 
-#tower0 = Platform(tower_img, DIM_TOWER, (200,1500), marge=(70,0))
-#tower1 = Platform(tower_img, DIM_TOWER, (600,1400), marge=(70,0))
-#tower2 = Platform(tower_img, DIM_TOWER, (1000,1300), marge=(70,0))
-#
-#towers = [tower0, tower1, tower2]
-
 class Form(Platform):
     screen = screen
     MARGE_WIDTH = E(20)
@@ -152,85 +149,85 @@ blocks = []
 #1
 d = (E(300),E(100))
 p = (E(400),E(1300))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #2
 d = (E(200),E(100))
 p = (E(0),E(1000))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #3
 d = (E(200),E(100))
 p = (E(500),E(800))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #4
 d = (E(100),E(200))
 p = (E(700),E(700))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #5
 d = (E(100),E(100))
 p = (E(1300),E(1500))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #6
 d = (E(100),E(200))
 p = (E(1400),E(1400))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #7
 d = (E(400),E(100))
 p = (E(1700),E(500))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #8
 d = (E(100),E(100))
 p = (E(1700),E(400))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #9
 d = (E(400),E(100))
 p = (E(2500),E(800))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #10
 d = (E(700),E(500))
 p = (E(2300),E(1100))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #11
 d = (E(200),E(100))
 p = (E(700),E(400))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #12
 d = (E(300),E(100))
 p = (E(1000),E(200))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #13
 d = (E(100),E(100))
 p = (E(300),E(500))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #14
 d = (E(200),E(100))
 p = (E(2800),E(500))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #15
 d = (E(300),E(100))
 p = (E(2300),E(200))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #16
 d = (E(200),E(200))
 p = (E(2000),E(1400))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)
 #17
 d = (E(100),E(100))
 p = (E(2200),E(1300))
-b = Form(d,p, C.RED)
+b = Form(d,p, get_color())
 blocks.append(b)

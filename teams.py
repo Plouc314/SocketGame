@@ -7,7 +7,6 @@ E = lambda x: int(x*dim.f)
 DIM_TEAMY = E(80)
 DIM_PY = E(70)
 
-TCOLORS = [C.DARK_BLUE, C.DARK_GREEN, C.DARK_PURPLE]
 
 def get_y_decal(selected_teams):
         y_decal = 0
@@ -19,7 +18,7 @@ class Team:
     def __init__(self, pos, dim_x, color, n):
         self.dim = (dim_x, DIM_TEAMY)
         self.textbox = TextBox(self.dim,color, pos, f'  Team {n}',
-                        marge=True, TEXT_COLOR=C.WHITE, centered=False)
+                        marge=True, TEXT_COLOR=C.BLACK, centered=False)
         b_dx = int(1/5*dim_x)
         self.button_join = Button((b_dx,DIM_TEAMY),C.XLIGHT_GREY,(0,0),'Join',font=Font.f30)
         self.n = n
@@ -65,7 +64,7 @@ class PlayerBox:
         self.dim = (dim_x, DIM_PY)
         self.username = username
         self.textbox = TextBox(self.dim, color, pos, username,
-                 font=Font.f50, marge=True, TEXT_COLOR=C.WHITE)
+                 font=Font.f50, marge=True, TEXT_COLOR=C.BLACK)
 
     def display(self):
         self.textbox.display()
@@ -96,7 +95,7 @@ class Teams:
 
     @classmethod
     def create_team(cls, n):
-        color = TCOLORS[n]
+        color = C.WHITE
         new_team = Team((cls.pos[0],0),cls.dim[0],color,n)
         cls.teams.append(new_team)
 
@@ -148,10 +147,14 @@ class Teams:
                     cls.can_add_team = False
         
         # check for potential new player
-        for username in  cls.client.new_env_players:
+        for username in cls.client.new_env_players:
             cls.teams[0].create_player(username)
-        
         cls.client.new_env_players = []
+
+        # check for potential players left
+        for username in cls.client.left_env_players:
+            cls.change_team(username, -1)
+        cls.client.left_env_players = []
 
     @classmethod
     def change_team(cls, username, new_team_idx):
@@ -159,8 +162,9 @@ class Teams:
         for team in cls.teams:
             team.check_del_player(username)
         # then create player in another team
-        team_to_add = cls.get_team(new_team_idx)
-        team_to_add.create_player(username)
+        if new_team_idx != -1: # in the case -1, just delete the player
+            team_to_add = cls.get_team(new_team_idx)
+            team_to_add.create_player(username)
 
     @classmethod
     def get_team(cls, n):

@@ -15,7 +15,7 @@ client.connect(ADDR)
 
 class Client:
     client = client
-    fr_msgs = []
+    fr_states = {}
     fr_demands = []
     friends = {}
     ready_users = []
@@ -24,6 +24,7 @@ class Client:
     dead_players = []
     team_changes = {}
     new_env_players = []
+    left_env_players = []
     team_created = False
     is_dfr_valid = None
     is_del_fr = False
@@ -89,9 +90,14 @@ class Client:
                     break
                 elif msg[0] == 'fr': # friend connected or disconnected
                     if msg[1] == 'conn':
-                        self.fr_msgs.append((msg[2],True))
-                    else:
-                        self.fr_msgs.append((msg[2],False))
+                        self.friends[msg[2]] = 'conn'
+                    elif msg[1] == 'disconn':
+                        self.friends[msg[2]] = 'disconn'
+                    elif msg[1] == 'inenv':
+                        self.friends[msg[2]] = 'inenv'
+                elif msg[0] == 'outenv':
+                    self.friends[msg[1]] = 'conn'
+                    self.left_env_players.append(msg[1])
                 elif msg[0] == 'dfr': # friend demand
                     self.fr_demands.append(msg[1])
                 elif msg[0] == 'delfr': # a friend delete self (you)
@@ -192,13 +198,7 @@ class Client:
         self.logged = False
         self.friends = {}
         self.fr_demands = []
-        self.fr_msgs = []
         self.send('disconn')
-
-    def check_friend(self):
-        for username, is_conn in self.fr_msgs:
-            self.friends[username] = is_conn
-        self.fr_msgs = []
 
     def del_friend(self, username):
         self.friends.pop(username)

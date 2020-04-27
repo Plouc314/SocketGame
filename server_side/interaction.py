@@ -103,7 +103,21 @@ class Interaction:
                 friends.append(client)
                 client_friends[client.index] = True
         return friends, client_friends
-                
+
+    @classmethod
+    def inform_inenv(cls, username):
+        the_client = cls.get_client(username)
+        friends, _ = cls.get_connected_friends(the_client)
+        for friend in friends:
+            send(friend.conn, f'fr|inenv|{username}')
+    
+    @classmethod
+    def inform_outenv(cls, username):
+        the_client = cls.get_client(username)
+        friends, _ = cls.get_connected_friends(the_client)
+        for friend in friends:
+            send(friend.conn, f'outenv|{username}')
+
     @classmethod
     def is_connected(cls, username):
         for client in cls.clients:

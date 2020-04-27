@@ -45,6 +45,7 @@ class C:
     LIGHT_BROWN = (225, 167, 69)
     DARK_PURPLE = (140, 17, 159)
     PURPLE = (180, 57, 199)
+    YELLOW = (253, 240, 49)
 
 class Font:
     f25 = pygame.font.SysFont("Arial", E(25))

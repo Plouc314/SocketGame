@@ -38,12 +38,11 @@ class Invitation:
 class Friend:
     CTEXT = C.GREEN
     CBUTTON = C.LIGHT_GREEN
-    def __init__(self, dim, pos, username, connected):
+    def __init__(self, dim, pos, username, state):
         self.pos = pos
         self.username = username
         self.in_game = False
-        self.connected = connected
-        self.set_colors()
+        self.state = state
         self.text = TextBox((int(5/8*dim[0]),dim[1]),self.CTEXT, pos, username, font=Font.f30,marge=True)
         self.button_invite = Button((int(1/4*dim[0]),dim[1]),self.CBUTTON,
                             (pos[0]+int(5/8*dim[0]),pos[1]),'Invite',font=Font.f30)
@@ -52,21 +51,19 @@ class Friend:
         self.button_delete = Button((int(1/8*dim[0]),dim[1]),C.LIGHT_GREY,
                             (pos[0]+int(7/8*dim[0]),pos[1]),'Del',font=Font.f30)
 
-    def set_colors(self):
-        if self.connected:
-            self.CTEXT = C.GREEN
-            self.CBUTTON = C.LIGHT_GREEN
-        else:
-            self.CTEXT = C.RED
-            self.CBUTTON = C.LIGHT_RED
-
     def display(self):
-        self.set_colors()
-        self.text.set_color(self.CTEXT, marge=True)
-        self.button_invite.set_color(self.CBUTTON, marge=True)
+        if self.state == 'conn' or self.state == 'inenv':
+            self.text.set_color(C.GREEN, marge=True)
+            self.button_invite.set_color(C.LIGHT_GREEN, marge=True)
+        else:
+            self.text.set_color(C.RED, marge=True)
+            self.button_invite.set_color(C.LIGHT_RED, marge=True)
         self.text.display()
-        self.button_invite.display()
         self.button_delete.display()
+        if self.state == 'inenv':
+            self.text_ingame.display()
+        else:
+            self.button_invite.display()
 
 NORMAL = 0
 ADD_FR = 1
@@ -108,21 +105,20 @@ class Friends:
         self.text_fail = TextBox(DIM_LTB,C.WHITE, POS_TEXT,
                     'Invalid username',font=Font.f50, TEXT_COLOR=C.RED)
 
-    def add_friend(self, username, connected):
+    def add_friend(self, username, state):
         i = len(self.obj_friends)
-        new_friend = Friend(self.DIM_FR,(self.pos[0],self.pos[1]+i*E(60)),username, connected)
+        new_friend = Friend(self.DIM_FR,(self.pos[0],self.pos[1]+i*E(60)),username, state)
         self.obj_friends.append(new_friend)
 
     def check_connected(self):
-        self.client.check_friend()
         # check for connected/disconnected friends
-        for username, is_conn in self.client.friends.items():
+        for username, state in self.client.friends.items():
             if username in self.usernames:
                 index = self.usernames.index(username)
-                self.obj_friends[index].connected = is_conn
+                self.obj_friends[index].state = state
             else:
                 self.usernames.append(username)
-                self.add_friend(username, is_conn)
+                self.add_friend(username, state)
         
         # get potential new friends demands
         new_friend_demands = self.client.get_demand_fr()
@@ -163,7 +159,8 @@ class Friends:
             if friend.button_delete.pushed(events):
                 self.del_friend(friend)
             if friend.button_invite.pushed(events):
-                self.client.invite_friend(friend.username)
+                if friend.state == 'conn':
+                    self.client.invite_friend(friend.username)
 
     def react_events_addfr(self, events, pressed):
         self.input_add.run(events, pressed)

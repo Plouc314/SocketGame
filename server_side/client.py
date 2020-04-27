@@ -100,6 +100,7 @@ class Client:
             other_client = Interaction.get_client(username)
             self.env = Env((self, other_client),(self.username, other_client.username))
             other_client.env = self.env
+            Interaction.inform_inenv(other_client.username)
             other_client.in_env = True
             self.in_env = True
 
@@ -114,6 +115,7 @@ class Client:
                 self.env = other_client.env
             else:
                 self.create_env(username)
+            Interaction.inform_inenv(self.username)
 
     def run(self):
         while self.connected:
@@ -123,7 +125,10 @@ class Client:
                 if msg == DISCONNECT_MESSAGE:
                         # disconnect
                         if self.in_env:
-                            self.env.stop()
+                            if self.env.in_game:
+                                self.env.stop_game(self.username)
+                            else:
+                                self.env.quit(self.username)
                         self.connected = False
                         if self.logged:
                             Interaction.disconn_friend(self)
@@ -153,7 +158,7 @@ class Client:
                             if self.env.in_game:
                                 self.env.stop_game(self.username) # quit game
                             else:
-                                self.env.stop() # quit env
+                                self.env.quit(self.username) # quit env
                         elif msg[1] == 'dead':
                             self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
                         elif msg[1] == 'team':
