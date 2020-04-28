@@ -5,6 +5,7 @@ from data import Data, store_user_data
 from time import sleep
 
 DISCONNECT_MESSAGE = "!DISCONNECT"
+VERSION = '1.0'
 
 class Client:
     in_env = False
@@ -137,11 +138,15 @@ class Client:
 
                 if not self.logged:
                     print(f"[{self.addr}] {msg}")
-                    state, username, password = msg.split('|')
-                    if state == 'log':
-                        self.log(username, password)
-                    elif state == 'sign':
-                        self.sign(username, password)
+                    # update file asking for the game version: to update game if needed
+                    if msg == 'version': 
+                        send(self.conn, VERSION)
+                    else:
+                        state, username, password = msg.split('|')
+                        if state == 'log':
+                            self.log(username, password)
+                        elif state == 'sign':
+                            self.sign(username, password)
                 else:
                     if self.in_env:
                         if not self.env.in_game:

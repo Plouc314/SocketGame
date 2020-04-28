@@ -9,7 +9,6 @@ pygame.init()
 inter = Interface()
 
 menu = Menu(Client())
-#menu = Menu(1)
 
 while inter.running:
     pressed, events = inter.run()

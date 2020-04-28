@@ -15,8 +15,12 @@ def set_screen(screen):
     Cadre.screen = screen
     Interface.screen = screen
 
+with open('screen_factor.txt') as file:
+    # get the specific factor of the client
+    factor = float(file.read())
+
 class Dimension:
-    f = 1
+    f = factor
     def __init__(self, dim):
         self.window = dim
         self.center_x = int(dim[0]/2)
