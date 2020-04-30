@@ -3,7 +3,7 @@ import threading
 import pandas as pd
 from time import sleep
 from interaction import Interaction
-from client import Client
+from client import Client, clients
 from env import Env
 
 HEADER = 64
@@ -19,9 +19,6 @@ try:
 except:
     print('Port already used')
     quit()
-
-clients = []
-
         
 
 def start():

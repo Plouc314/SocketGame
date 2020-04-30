@@ -5,7 +5,9 @@ from data import Data, store_user_data
 from time import sleep
 
 DISCONNECT_MESSAGE = "!DISCONNECT"
-VERSION = '1.0'
+VERSION = '1.1'
+
+clients = []
 
 class Client:
     in_env = False
@@ -19,6 +21,7 @@ class Client:
         self.env_msgs = None
         self.game_dead_players = {}
         self.current_demand = None
+        self.current_pos = None
     
     def log(self, username, password):
         # check for valide username and password
@@ -153,7 +156,7 @@ class Client:
                             print(f'[{self.username}] {msg}')
                     else:
                         print(f'[{self.username}] {msg}')
-
+    
                     msg = msg.split('|')
                     # env msg 
                     if msg[0] == 'env':
@@ -168,6 +171,8 @@ class Client:
                             self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
                         elif msg[1] == 'team':
                             self.env.handeln_team(msg[2:])
+                        elif msg[1] == 'pos':
+                            self.current_pos = [int(msg[2]),int(msg[3])]
                         else:
                             self.env_msgs = msg[1:]
                     elif msg[0] == 'disconn':
@@ -198,3 +203,5 @@ class Client:
                         self.check_env_rinv(msg[1])
 
         self.conn.close()
+        # remove (thus delete) client from clients list
+        clients.remove(self)

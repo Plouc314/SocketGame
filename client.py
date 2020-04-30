@@ -6,7 +6,7 @@ HEADER = 64
 PORT = 5050 #44778
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = '192.168.1.122'
+SERVER = '178.195.19.216' #'192.168.1.122'
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,6 +25,7 @@ class Client:
     team_changes = {}
     new_env_players = []
     left_env_players = []
+    pos_updates = {}
     team_created = False
     is_dfr_valid = None
     is_del_fr = False
@@ -143,6 +144,8 @@ class Client:
                 self.dead_players.append(msg[2])
             elif msg[1] == 'stop':
                 self.in_env, self.in_game, self.in_game_session = False, False, False
+            elif msg[1] == 'pos':
+                self.pos_updates[msg[2]] = [int(msg[3]), int(msg[4])]
             else:
                 msg = msg[1:]
                 try:
@@ -260,6 +263,9 @@ class Client:
     
     def send_new_team(self, n):
         self.send(f'env|team|change|{self.username}|{n}')
+
+    def send_pos(self, pos):
+        self.send(f'env|pos|{pos[0]}|{pos[1]}')
 
     def get_version(self):
         ''' Ask server for game version: run in update.py - before main.py'''

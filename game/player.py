@@ -37,6 +37,9 @@ class Player:
     # health bar
     health_surf = pygame.Surface(DIM_HB)
     health_surf.fill(C.GREEN)
+    # delay check pos
+    delay = 0
+    DTIME = 100
     def __init__(self, char, username, team_idx, is_client=False):
         self.img = chars[char]
         self.img = pygame.transform.scale(self.img, self.dim)
@@ -85,6 +88,12 @@ class Player:
         self.BOTTOMRIGHT = (self.pos[0]+self.dim[0],self.pos[1]+self.dim[1])
         self.corners = (self.TOPLEFT, self.TOPRIGHT, self.BOTTOMLEFT, self.BOTTOMRIGHT)
 
+    def run_pos_check(self):
+        self.delay += 1
+        if self.delay == self.DTIME:
+            self.delay = 0
+            self.client.send_pos(self.pos)
+
     @Counter.call
     def react_events_client(self, pressed, events):
         self.orien = self.get_angle()
@@ -108,6 +117,8 @@ class Player:
         self.weapon.rotate(self.orien)
         self.weapon.update()
         self.check_jump_client(pressed)
+        # send occasionally position update
+        self.run_pos_check()
 
     def react_events_server(self, comm):
         try:
@@ -124,7 +135,7 @@ class Player:
             self.move_right()
         
         self.check_jump_server(comm)
-            
+
     def check_jump_client(self, pressed):
         if pressed[pygame.K_SPACE] and self.can_jump:
             self.dh = -self.POWER_JUMP

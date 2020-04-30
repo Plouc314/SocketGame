@@ -10,7 +10,7 @@ class Interaction:
     @classmethod
     def run(cls):
         while 1:
-            sleep(.5)
+            sleep(.2)
             
             # check that clients are connected
             for client in cls.clients:

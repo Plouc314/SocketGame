@@ -230,6 +230,7 @@ class Menu:
     def run(self, events, pressed):
         if self.state == 'in game':
             if not self.client.in_game_session:
+                self.play_pushed = False
                 if self.client.in_env:
                     self.state = 'env'
                 else:
@@ -251,6 +252,7 @@ class Menu:
             self.display_env()
             self.react_events_env(events, pressed)
             if not self.client.in_env:
+                self.play_pushed = False
                 self.state = 'logged'
         elif self.state == 'fail log':
             self.display_faillog()

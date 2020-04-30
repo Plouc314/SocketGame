@@ -15,12 +15,15 @@ def set_screen(screen):
     Cadre.screen = screen
     Interface.screen = screen
 
-with open('screen_factor.txt') as file:
+with open('parameters.txt') as file:
     # get the specific factor of the client
-    factor = float(file.read())
+    content = file.read()
+    content = content.split('\n')
+    dim_factor = float(content[0])
+    font_factor = float(content[1])
 
 class Dimension:
-    f = factor
+    f = dim_factor
     def __init__(self, dim):
         self.window = dim
         self.center_x = int(dim[0]/2)
@@ -51,19 +54,27 @@ class C:
     PURPLE = (180, 57, 199)
     YELLOW = (253, 240, 49)
 
+#set font
+if font_factor == 1.3:
+    # windows font
+    fontname = "Ubuntu"
+else:
+    # mac and linux font
+    fontname = "Arial"
+
 class Font:
-    f25 = pygame.font.SysFont("Arial", E(25))
-    f30 = pygame.font.SysFont("Arial", E(30))
-    f50 = pygame.font.SysFont("Arial", E(50))
-    f70 = pygame.font.SysFont("Arial", E(70))
-    f100 = pygame.font.SysFont("Arial", E(100))
+    f25 = pygame.font.SysFont( fontname, E(25* dim_factor*font_factor))
+    f30 = pygame.font.SysFont( fontname, E(30* dim_factor*font_factor))
+    f50 = pygame.font.SysFont( fontname, E(50* dim_factor*font_factor))
+    f70 = pygame.font.SysFont( fontname, E(70* dim_factor*font_factor))
+    f100 = pygame.font.SysFont(fontname, E(100*dim_factor*font_factor))
     @classmethod
     def init(cls, factor):
-        cls.f25 = pygame.font.SysFont("Arial", int(25*factor))
-        cls.f30 = pygame.font.SysFont("Arial", int(30*factor))
-        cls.f50 = pygame.font.SysFont("Arial", int(50*factor))
-        cls.f70 = pygame.font.SysFont("Arial", int(70*factor))
-        cls.f100 = pygame.font.SysFont("Arial", int(100*factor))
+        cls.f25 = pygame.font.SysFont( fontname, int(25* dim_factor*font_factor))
+        cls.f30 = pygame.font.SysFont( fontname, int(30* dim_factor*font_factor))
+        cls.f50 = pygame.font.SysFont( fontname, int(50* dim_factor*font_factor))
+        cls.f70 = pygame.font.SysFont( fontname, int(70* dim_factor*font_factor))
+        cls.f100 = pygame.font.SysFont(fontname, int(100*dim_factor*font_factor))
 
 
 
