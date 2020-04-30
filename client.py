@@ -25,7 +25,6 @@ class Client:
     team_changes = {}
     new_env_players = []
     left_env_players = []
-    pos_updates = {}
     team_created = False
     is_dfr_valid = None
     is_del_fr = False
@@ -144,8 +143,6 @@ class Client:
                 self.dead_players.append(msg[2])
             elif msg[1] == 'stop':
                 self.in_env, self.in_game, self.in_game_session = False, False, False
-            elif msg[1] == 'pos':
-                self.pos_updates[msg[2]] = [int(msg[3]), int(msg[4])]
             else:
                 msg = msg[1:]
                 try:
@@ -171,6 +168,11 @@ class Client:
                         d['right'] = int(info[1])
                     elif info[0] == 'j':
                         d['jump'] = True
+                    elif info[0] == 'x':
+                        d['x'] = int(info[1])
+                    elif info[0] == 'y':
+                        d['y'] = int(info[1])
+
                 self.game_msgs.append(d)
 
     def send_chat_msg(self, msg):
@@ -240,11 +242,13 @@ class Client:
     def env_ready(self, weapon, char):
         self.send(f'env|ready|{weapon}|{char}|{self.team}')
     
-    def env_game(self, angle, fire, left, right, jump):
+    def env_game(self, angle, fire, left, right, jump, pos):
         msg = 'env'
         msg += f'|a{angle:.2f}'
         msg += f'|l{left}'
         msg += f'|r{right}'
+        if pos != None: # if the player is not moving
+            msg += f'|x{pos[0]}|y{pos[1]}'
         if fire:
             msg += '|f'
         if jump:
@@ -263,9 +267,6 @@ class Client:
     
     def send_new_team(self, n):
         self.send(f'env|team|change|{self.username}|{n}')
-
-    def send_pos(self, pos):
-        self.send(f'env|pos|{pos[0]}|{pos[1]}')
 
     def get_version(self):
         ''' Ask server for game version: run in update.py - before main.py'''

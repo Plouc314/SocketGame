@@ -45,7 +45,6 @@ class Env:
 
     def run(self):
         while self.active:
-            self.check_pos_update()
             self.body()
 
     def body(self):
@@ -138,21 +137,6 @@ class Env:
                     try:
                         client.game_dead_players.pop(username)
                     except: pass
-
-    def check_pos_update(self):
-        pos_updates = {}
-        # get all client pos update
-        for client in self.clients:
-            if client.current_pos != None:
-                pos_updates[client.username] = client.current_pos
-                client.current_pos = None
-        
-        # send all pos update to clients
-        for username, pos in pos_updates.items():
-            msg = f'env|pos|{username}|{pos[0]}|{pos[1]}'
-            for client in self.clients:
-                if client.username != username:
-                    send(client.conn, msg)
 
     def send_play_msg(self):
         for client in self.clients:

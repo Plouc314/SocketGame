@@ -66,7 +66,7 @@ class AK(Weapon):
     original_img = pygame.transform.scale(ak, DIM_W)
     img = original_img
     rect = img.get_rect()
-    v_bullets = 80
+    v_bullets = E(80)
     s_bullets = scale((10,10), dim.f)
     damage = 15
     firing_rate = 3
@@ -78,7 +78,7 @@ class M4(Weapon):
     original_img = pygame.transform.scale(m4, DIM_W)
     img = original_img
     rect = img.get_rect()
-    v_bullets = 80
+    v_bullets = E(80)
     s_bullets = scale((10,10), dim.f)
     damage = 15
     firing_rate = 3
@@ -89,7 +89,7 @@ class Sniper(Weapon):
     original_img = pygame.transform.scale(sniper, DIM_W)
     img = original_img
     rect = img.get_rect()
-    v_bullets = 100
+    v_bullets = E(100)
     s_bullets = scale((15, 15), dim.f)
     damage = 60
     firing_rate = 30
@@ -100,7 +100,7 @@ class Bazooka(Weapon):
     original_img = pygame.transform.scale(bazooka, DIM_W)
     img = original_img
     rect = img.get_rect()
-    v_bullets = 30
+    v_bullets = E(30)
     s_bullets = scale((30, 30), dim.f)
     damage = 100
     firing_rate = 30

@@ -88,12 +88,6 @@ class Player:
         self.BOTTOMRIGHT = (self.pos[0]+self.dim[0],self.pos[1]+self.dim[1])
         self.corners = (self.TOPLEFT, self.TOPRIGHT, self.BOTTOMLEFT, self.BOTTOMRIGHT)
 
-    def run_pos_check(self):
-        self.delay += 1
-        if self.delay == self.DTIME:
-            self.delay = 0
-            self.client.send_pos(self.pos)
-
     @Counter.call
     def react_events_client(self, pressed, events):
         self.orien = self.get_angle()
@@ -113,12 +107,22 @@ class Player:
 
         if pressed[pygame.K_SPACE] and self.can_jump:
             jump = 1
-        self.client.env_game(self.orien, fire, left, right, jump)
+
+        # check if player is moving
+        #if not left and not right and not self.is_moving():
+        #    pos = self.pos
+        #else:
+        pos = None
+
+        self.client.env_game(self.orien, fire, left, right, jump, pos)
         self.weapon.rotate(self.orien)
         self.weapon.update()
         self.check_jump_client(pressed)
-        # send occasionally position update
-        self.run_pos_check()
+
+    def is_moving(self):
+        if self.dh in [0, 1]:
+            return True
+        return False
 
     def react_events_server(self, comm):
         try:
@@ -135,6 +139,12 @@ class Player:
             self.move_right()
         
         self.check_jump_server(comm)
+
+        # check for a potential position update
+        try:
+            self.x = comm['x']
+            self.y = comm['y']
+        except: pass
 
     def check_jump_client(self, pressed):
         if pressed[pygame.K_SPACE] and self.can_jump:

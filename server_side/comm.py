@@ -5,8 +5,8 @@ FORMAT = 'utf-8'
 def receive_msg(conn):
     msg_length = conn.recv(HEADER).decode(FORMAT)
     if msg_length:
-        msg_length = int(msg_length)
         try:
+            msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
             return msg
         except:

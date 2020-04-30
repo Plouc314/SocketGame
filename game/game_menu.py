@@ -3,6 +3,7 @@ from .player import Player
 from .weapons import AK, M4, Sniper, Bazooka
 from random import randint
 from helper import scale
+from time import sleep
 import pygame
 
 E = lambda x: int(x*dim.f) 
@@ -101,6 +102,8 @@ class GameMenu:
 
         # check if everyone is ready
         if len(cls.players) == cls.n_players:
+            # wait a little bit to let the server do what it has to do
+            sleep(.1)
             cls.ready = True
             cls.client.in_game = True
             teams = cls.set_teams()

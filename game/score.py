@@ -130,7 +130,6 @@ class Score:
 
     @classmethod
     def react_events(cls):
-        cls.check_pos_updates()
         cls.check_confirmed_death()
         for comm in cls.client.game_msgs:
             username = comm['username']
@@ -164,12 +163,4 @@ class Score:
         cls.ended = False
         cls.teams = {}
         cls.players = []
-
-    @classmethod
-    def check_pos_updates(cls):
-        for username, pos in cls.client.pos_updates.items():
-            player = cls.get_player(username)
-            player.x = pos[0]
-            player.y = pos[1]
-        cls.client.pos_updates = {}
 

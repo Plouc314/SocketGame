@@ -152,11 +152,10 @@ class Client:
                             self.sign(username, password)
                 else:
                     if self.in_env:
-                        if not self.env.in_game:
-                            print(f'[{self.username}] {msg}')
+                        #if not self.env.in_game:
+                        print(f'[{self.username}] {msg}')
                     else:
                         print(f'[{self.username}] {msg}')
-    
                     msg = msg.split('|')
                     # env msg 
                     if msg[0] == 'env':
@@ -171,8 +170,6 @@ class Client:
                             self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
                         elif msg[1] == 'team':
                             self.env.handeln_team(msg[2:])
-                        elif msg[1] == 'pos':
-                            self.current_pos = [int(msg[2]),int(msg[3])]
                         else:
                             self.env_msgs = msg[1:]
                     elif msg[0] == 'disconn':
