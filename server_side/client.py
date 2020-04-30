@@ -152,8 +152,8 @@ class Client:
                             self.sign(username, password)
                 else:
                     if self.in_env:
-                        #if not self.env.in_game:
-                        print(f'[{self.username}] {msg}')
+                        if not self.env.in_game:
+                            print(f'[{self.username}] {msg}')
                     else:
                         print(f'[{self.username}] {msg}')
                     msg = msg.split('|')

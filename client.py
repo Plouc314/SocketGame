@@ -169,9 +169,9 @@ class Client:
                     elif info[0] == 'j':
                         d['jump'] = True
                     elif info[0] == 'x':
-                        d['x'] = int(info[1])
+                        d['x'] = int(info[1:])
                     elif info[0] == 'y':
-                        d['y'] = int(info[1])
+                        d['y'] = int(info[1:])
 
                 self.game_msgs.append(d)
 

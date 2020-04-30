@@ -109,20 +109,15 @@ class Player:
             jump = 1
 
         # check if player is moving
-        #if not left and not right and not self.is_moving():
-        #    pos = self.pos
-        #else:
-        pos = None
+        if not left and not right and self.dh in [0,1]:
+            pos = self.pos
+        else:
+            pos = None
 
         self.client.env_game(self.orien, fire, left, right, jump, pos)
         self.weapon.rotate(self.orien)
         self.weapon.update()
         self.check_jump_client(pressed)
-
-    def is_moving(self):
-        if self.dh in [0, 1]:
-            return True
-        return False
 
     def react_events_server(self, comm):
         try:

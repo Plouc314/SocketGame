@@ -134,7 +134,8 @@ class Score:
         for comm in cls.client.game_msgs:
             username = comm['username']
             player = cls.get_player(username)
-            player.react_events_server(comm)
+            if not cls.client_player is player:
+                player.react_events_server(comm)
         cls.client.game_msgs = []
 
     @classmethod
