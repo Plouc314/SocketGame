@@ -267,12 +267,3 @@ class Client:
     
     def send_new_team(self, n):
         self.send(f'env|team|change|{self.username}|{n}')
-
-    def get_version(self):
-        ''' Ask server for game version: run in update.py - before main.py'''
-        self.send('version')
-
-        # wait for response
-        response = self.receive_msg()
-
-        return response
