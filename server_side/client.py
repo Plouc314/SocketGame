@@ -19,6 +19,7 @@ class Client:
         self.chat_current_msg = None
         self.env_msgs = None
         self.game_dead_players = {}
+        self.game_hit_players = {}
         self.current_demand = None
         self.current_pos = None
     
@@ -163,6 +164,9 @@ class Client:
                                 self.env.quit(self.username) # quit env
                         elif msg[1] == 'dead':
                             self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
+                        elif msg[1] == 'hit':
+                            # same idea as dead check system
+                            self.game_hit_players[msg[2]] = {'life':5,'damage':int(msg[3])} 
                         elif msg[1] == 'team':
                             self.env.handeln_team(msg[2:])
                         else:

@@ -90,6 +90,7 @@ class Env:
             for client in self.clients:
                 send(client.conn, msg)
         
+        self.check_hit_player()
         self.check_dead_players()
 
     def handeln_team(self, msg):
@@ -136,6 +137,34 @@ class Env:
                     send(client.conn, f'env|dead|{username}')
                     try:
                         client.game_dead_players.pop(username)
+                    except: pass
+
+    def check_hit_player(self):
+        # check for hit player
+        hit_players = {}
+        info_to_pop = []
+        for client in self.clients:
+            for username, info in client.game_hit_players.items():
+                if not username in hit_players.keys():
+                    hit_players[username] = {'count':1,'damage': info['damage']}
+                else:
+                    hit_players[username]['count'] += 1
+                # reduce lifetime of infos
+                client.game_hit_players[username]['life'] -= 1
+                if client.game_hit_players[username]['life'] == 0:
+                    info_to_pop.append([client, username])
+        
+        for client, username in info_to_pop:
+            client.game_hit_players.pop(username)
+
+        # if every player send death -> confirm death
+        for username, info in hit_players.items():
+            if info['count'] == self.n_clients:
+                for client in self.clients:
+                    damage = info['damage']
+                    send(client.conn, f'env|hit|{username}|{damage}')
+                    try:
+                        client.game_hit_players.pop(username)
                     except: pass
 
     def send_play_msg(self):

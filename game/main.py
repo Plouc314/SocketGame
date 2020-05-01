@@ -35,6 +35,7 @@ def start_game(client):
     Score.reset()
     GameMenu.init(client, Score)
     Score.client = client
+    BulletSystem.client = client
 
 def run_game(pressed, events):
     if not GameMenu.ready:

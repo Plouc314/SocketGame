@@ -94,7 +94,7 @@ class Player:
         fire, left, right, jump = 0,0,0,0
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                as_shot = self.weapon.fire(self.orien, self.username)
+                as_shot = self.weapon.fire(self.orien, self.team_idx)
                 fire = as_shot
 
         if pressed[pygame.K_a]:
@@ -126,7 +126,7 @@ class Player:
             self.weapon.update()
         except: pass
         if 'fire' in comm.keys():
-            self.weapon.fire(self.orien, self.username, from_server=True)
+            self.weapon.fire(self.orien, self.team_idx, from_server=True)
         
         if comm['left']:
             self.move_left()

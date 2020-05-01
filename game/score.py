@@ -90,6 +90,14 @@ class Score:
         cls.client.dead_players = []
 
     @classmethod
+    def check_confirmed_hit(cls):
+        for info in cls.client.hit_players:
+            hit_player = cls.get_player(info['username'])
+            hit_player.health -= info['damage']
+
+        cls.client.hit_players = []
+
+    @classmethod
     def have_lost(cls, other_player):
         for team in cls.teams.values():
             for i, player in enumerate(team['players']):
@@ -130,6 +138,7 @@ class Score:
 
     @classmethod
     def react_events(cls):
+        cls.check_confirmed_hit()
         cls.check_confirmed_death()
         for comm in cls.client.game_msgs:
             username = comm['username']

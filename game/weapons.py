@@ -43,10 +43,10 @@ class Weapon:
         self.rect = self.img.get_rect()
         self.rect.center = (x, y) 
 
-    def fire(self, orien, username, from_server=False):
+    def fire(self, orien, team_idx, from_server=False):
         if not self.delayed or from_server:
             new_bullet = Bullet(self.s_bullets, self.rect.center, self.v_bullets, orien,
-                     username=username, damage=self.damage)
+                     team_idx=team_idx, damage=self.damage)
             BulletSystem.bullets.append(new_bullet)
             self.delayed = True
             return 1 
@@ -127,6 +127,7 @@ class BulletSystem:
     # store all the bullets
     bullets = []
     explosions = []
+    client = None
     @classmethod
     def update(cls, platforms, players):
         for bullet in cls.bullets:
@@ -146,11 +147,11 @@ class BulletSystem:
         
             for player in players:
                 if not player.dead: # check that the player is alive
-                    if player.username != bullet.username: # check that bullet don't tuch player who fired it
+                    if player.team_idx != bullet.team_idx: # check that bullet don't touch player of same team
                         if player.touch_hitbox(bullet.rect.center): # bullet touch player
-                            # decrease health of player
-                            player.health -= bullet.damage
                             cls.touch(bullet)
+                            # send msg to server and wait for confirmation
+                            cls.client.send_hit_player(player.username, bullet.damage)
 
         for expl in cls.explosions:
             expl.display()
@@ -167,8 +168,8 @@ class BulletSystem:
 
 class Bullet(pygame.sprite.Sprite):
     
-    def __init__(self, dim, pos, v, orien, username='', damage=0):
-        self.username = username
+    def __init__(self, dim, pos, v, orien, team_idx=0, damage=0):
+        self.team_idx = team_idx
         self.damage = damage
         self.dim = dim
         self.surf = pygame.Surface(dim)

@@ -22,6 +22,7 @@ class Client:
     game_msgs = []
     invs = []
     dead_players = []
+    hit_players = []
     team_changes = {}
     new_env_players = []
     left_env_players = []
@@ -141,6 +142,8 @@ class Client:
         else:
             if msg[1] == 'dead':
                 self.dead_players.append(msg[2])
+            elif msg[1] == 'hit':
+                self.hit_players.append({'username':msg[2],'damage':int(msg[3])})
             elif msg[1] == 'stop':
                 self.in_env, self.in_game, self.in_game_session = False, False, False
             else:
@@ -148,6 +151,7 @@ class Client:
                 try:
                     self.handeln_game_msg(msg)
                 except:
+                    print(msg)
                     print("[ERROR] Can't handeln game message")
                     self.in_env, self.in_game, self.in_game_session = False, False, False
 
@@ -267,3 +271,6 @@ class Client:
     
     def send_new_team(self, n):
         self.send(f'env|team|change|{self.username}|{n}')
+
+    def send_hit_player(self, username, damage):
+        self.send(f'env|hit|{username}|{damage}')
