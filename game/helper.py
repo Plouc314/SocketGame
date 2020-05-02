@@ -26,7 +26,12 @@ class Delayed:
         return inner
 
 from time import time
+import math
 
+def cal_angle(p1, p2):
+    angle = -math.atan2(p1[1]-p2[1], p1[0]-p2[0])
+    angle = 180/3.14 * angle
+    return angle
 
 def mean(array):
     total = 0

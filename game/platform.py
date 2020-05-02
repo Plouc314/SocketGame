@@ -142,6 +142,30 @@ class Form(Platform):
         self.screen.blit(self.surf, self.pos)
         self.display_margin()
 
+class Item(Form):
+    MARGE_WIDTH = E(4)
+    def __init__(self, dim, pos, color, img, amplitude=4):
+        super().__init__(dim, list(pos), color)
+        self.img = img
+        self.dh = 0
+        self.increment = 1/4
+        self.amplitude = amplitude
+
+    def update(self):
+        self.dh += self.increment
+        if abs(self.dh) == abs(self.amplitude):
+            if self.dh < 0:
+                self.increment = 1/4
+            else:
+                self.increment = -1/4
+        
+        self.pos[1] += int(self.dh)
+        self.set_corners(self.pos, self.dim)
+    
+    def display(self):
+        super().display()
+        screen.blit(self.img, self.pos)
+
 DIM_B = E(100)
 
 blocks = []

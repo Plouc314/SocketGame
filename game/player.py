@@ -1,7 +1,7 @@
 import pygame
 import math
 from base import screen, C, dim, Font
-from .helper import Delayed, Counter 
+from .helper import Delayed, Counter, cal_angle 
 from helper import scale
 E = lambda x: int(x*dim.f) 
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
@@ -158,8 +158,7 @@ class Player:
     def get_angle(self):
         mouse_pos = pygame.mouse.get_pos()
         weapon_pos = self.weapon.rect.center
-        angle = -math.atan2(mouse_pos[1]-weapon_pos[1], mouse_pos[0]-weapon_pos[0])
-        angle = 180/3.14 * angle
+        angle = cal_angle(mouse_pos, weapon_pos)
         return angle
 
     def move_left(self):

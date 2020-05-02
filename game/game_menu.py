@@ -1,6 +1,6 @@
 from base import TextBox, Button, C, Font, dim
 from .player import Player
-from .weapons import AK, M4, Sniper, Bazooka
+from .weapons import AK, M4, Sniper, Bazooka, Crossbow
 from random import randint
 from helper import scale
 from time import sleep
@@ -26,6 +26,7 @@ img_ak = pygame.image.load('game/imgs/ak.png')
 img_m4 = pygame.image.load('game/imgs/m4.png')
 img_sniper = pygame.image.load('game/imgs/sniper.png')
 img_bazooka = pygame.image.load('game/imgs/bazooka.png')
+img_crossbow = pygame.image.load('game/imgs/crossbow.png')
 
 class GameMenu:
     ready = False
@@ -44,8 +45,8 @@ class GameMenu:
         cls.text_are_ready = TextBox(DIM_TEXT, C.WHITE, POS_TW, '0/n players ready', font=Font.f50)
         cls.button_ak = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX, POS_BCWY),'',
                             font=Font.f70,image=img_ak)
-        cls.button_m4 = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(300), POS_BCWY),'',
-                            font=Font.f70,image=img_m4)
+        cls.button_crossbow = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(300), POS_BCWY),'',
+                            font=Font.f70,image=img_crossbow)
         cls.button_sniper = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(600), POS_BCWY),'',
                             font=Font.f70,image=img_sniper)
         cls.button_bazooka = Button(DIM_BCHOOSEW, C.LIGHT_GREEN, (POS_BCWX+E(900), POS_BCWY),'',
@@ -69,8 +70,8 @@ class GameMenu:
         player = Player(char, username, team,is_client=is_client)
         if weapon == 'ak':
             player.set_weapon(AK())
-        elif weapon == 'm4':
-            player.set_weapon(M4())
+        elif weapon == 'crossbow':
+            player.set_weapon(Crossbow())
         elif weapon == 'sniper':
             player.set_weapon(Sniper())
         elif weapon == 'bazooka':
@@ -82,7 +83,7 @@ class GameMenu:
     def set_ready(cls):
         # check if the player selected a weapon
         if not cls.as_chosen:
-            weapons = ['ak','m4','sniper','bazooka']
+            weapons = ['ak','crossbow','sniper','bazooka']
             cls.chosen_weapon = weapons[randint(0,3)] # choose weapon randomly
         
         username = cls.client.username
@@ -103,7 +104,7 @@ class GameMenu:
         # check if everyone is ready
         if len(cls.players) == cls.n_players:
             # wait a little bit to let the server do what it has to do
-            sleep(.1)
+            sleep(.2)
             cls.ready = True
             cls.client.in_game = True
             teams = cls.set_teams()
@@ -135,9 +136,9 @@ class GameMenu:
                 cls.chosen_weapon = 'ak'
                 cls.button_ak.set_color(C.BLUE, marge=True)
                 cls.as_chosen = True
-            elif cls.button_m4.pushed(events):
-                cls.chosen_weapon = 'm4'
-                cls.button_m4.set_color(C.BLUE, marge=True)
+            elif cls.button_crossbow.pushed(events):
+                cls.chosen_weapon = 'crossbow'
+                cls.button_crossbow.set_color(C.BLUE, marge=True)
                 cls.as_chosen = True
             elif cls.button_sniper.pushed(events):
                 cls.chosen_weapon = 'sniper'
@@ -153,7 +154,7 @@ class GameMenu:
         cls.text_weapons.display()
         cls.text_are_ready.display()
         cls.button_ak.display()
-        cls.button_m4.display()
+        cls.button_crossbow.display()
         cls.button_sniper.display()
         cls.button_bazooka.display()
         if not cls.ready_pushed:
