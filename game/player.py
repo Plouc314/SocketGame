@@ -110,7 +110,7 @@ class Player:
 
         # check if player is moving
         if not left and not right and self.dh in [0,1]:
-            pos = self.pos
+            pos = scale(self.pos, 1/dim.f) # standartize coord
         else:
             pos = None
 
@@ -137,8 +137,8 @@ class Player:
 
         # check for a potential position update
         if 'x' in comm.keys():
-            self.x = comm['x']
-            self.y = comm['y']
+            self.x = E(comm['x'])
+            self.y = E(comm['y'])
         
 
     def check_jump_client(self, pressed):
