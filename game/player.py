@@ -24,7 +24,6 @@ SPAWN_POSITIONS = [(0,E(1300)),(E(2800),E(900)), (E(1200),E(200))]
 
 class Player:
     orien = 0
-    weapon = None
     SPEED = E(15)
     POWER_JUMP = math.sqrt(150)
     POS_W = scale((50,100), dim.f)
@@ -40,10 +39,12 @@ class Player:
     # delay check pos
     delay = 0
     DTIME = 100
-    def __init__(self, char, username, team_idx, is_client=False):
+    def __init__(self, char, username, team_idx, is_client=False, base_weapon=None):
         self.img = chars[char]
         self.img = pygame.transform.scale(self.img, self.dim)
         self.original_img = self.img
+        self.base_weapon = base_weapon
+        self.active_weapon = base_weapon
         self.username = username
         self.team_idx = team_idx
         self.SPAWN_POS = SPAWN_POSITIONS[team_idx]
@@ -58,7 +59,6 @@ class Player:
         self.check_jump_client = deco_jump(self.check_jump_client)
         self.check_jump_server = deco_jump(self.check_jump_server)
 
-    
     @property
     def x(self):
         return self.pos[0]
@@ -66,7 +66,7 @@ class Player:
     @x.setter
     def x(self, value):
         self.pos[0] = value
-        self.weapon.set_pos((self.pos[0]+self.POS_W[0], self.pos[1]+self.POS_W[1]))
+        self.active_weapon.set_pos((self.pos[0]+self.POS_W[0], self.pos[1]+self.POS_W[1]))
     
     @property
     def y(self):
@@ -75,11 +75,11 @@ class Player:
     @y.setter
     def y(self, value):
         self.pos[1] = value
-        self.weapon.set_pos((self.pos[0]+self.POS_W[0], self.pos[1]+self.POS_W[1]))
+        self.active_weapon.set_pos((self.pos[0]+self.POS_W[0], self.pos[1]+self.POS_W[1]))
     
     def set_weapon(self, weapon):
-        self.weapon = weapon
-        self.weapon.set_pos((self.pos[0]+self.POS_W[0], self.pos[1]+self.POS_W[1]))
+        self.active_weapon = weapon
+        self.active_weapon.set_pos((self.pos[0]+self.POS_W[0], self.pos[1]+self.POS_W[1]))
 
     def set_corners(self):
         self.TOPLEFT = self.pos
@@ -94,7 +94,7 @@ class Player:
         fire, left, right, jump = 0,0,0,0
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                as_shot = self.weapon.fire(self.orien, self.team_idx)
+                as_shot = self.active_weapon.fire(self.orien, self.team_idx)
                 fire = as_shot
 
         if pressed[pygame.K_a]:
@@ -115,18 +115,18 @@ class Player:
             pos = None
 
         self.client.env_game(self.orien, fire, left, right, jump, pos)
-        self.weapon.rotate(self.orien)
-        self.weapon.update()
+        self.active_weapon.rotate(self.orien)
+        self.active_weapon.update()
         self.check_jump_client(pressed)
 
     def react_events_server(self, comm):
         if 'angle' in comm.keys():
             self.orien = comm['angle']
-            self.weapon.rotate(self.orien)
-            self.weapon.update()
+            self.active_weapon.rotate(self.orien)
+            self.active_weapon.update()
         
         if 'fire' in comm.keys():
-            self.weapon.fire(self.orien, self.team_idx, from_server=True)
+            self.active_weapon.fire(self.orien, self.team_idx, from_server=True)
         
         if comm['left']:
             self.move_left()
@@ -157,7 +157,7 @@ class Player:
 
     def get_angle(self):
         mouse_pos = pygame.mouse.get_pos()
-        weapon_pos = self.weapon.rect.center
+        weapon_pos = self.active_weapon.rect.center
         angle = cal_angle(mouse_pos, weapon_pos)
         return angle
 
@@ -166,6 +166,12 @@ class Player:
     
     def move_right(self):
         self.x = self.pos[0] + self.SPEED
+
+    def collision_items(self, items):
+        for item in items:
+            if item.collision(self.corners, just_touch=True):
+                # remove it
+                items.remove(item)
 
     def collisions(self,platforms):
         self.set_corners()
@@ -233,8 +239,7 @@ class Player:
         screen.blit(self.img, self.pos)
         self.display_health()
         self.display_username()
-        if self.weapon:
-            self.weapon.display()
+        self.active_weapon.display()
 
     def respawn(self):
         self.x = self.SPAWN_POS[0]

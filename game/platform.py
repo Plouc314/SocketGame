@@ -166,6 +166,17 @@ class Item(Form):
         super().display()
         screen.blit(self.img, self.pos)
 
+items = []
+
+DIM_ITEM = (E(80), E(80))
+
+img_m4 = pygame.image.load('game/imgs/m4.png')
+img_m4 = pygame.transform.scale(img_m4, DIM_ITEM)
+
+item1 = Item(DIM_ITEM, (E(400),E(1100)), C.LIGHT_GREY, img_m4)
+
+items.append(item1)
+
 DIM_B = E(100)
 
 blocks = []

@@ -6,6 +6,8 @@ from time import sleep
 
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
+INFO_LIFETIME = 20
+
 clients = []
 
 class Client:
@@ -163,10 +165,10 @@ class Client:
                             else:
                                 self.env.quit(self.username) # quit env
                         elif msg[1] == 'dead':
-                            self.game_dead_players[msg[2]] = 5 # lifetime of the information in frame
+                            self.game_dead_players[msg[2]] = INFO_LIFETIME
                         elif msg[1] == 'hit':
                             # same idea as dead check system
-                            self.game_hit_players[msg[2]] = {'life':5,'damage':int(msg[3])} 
+                            self.game_hit_players[msg[2]] = {'life':INFO_LIFETIME,'damage':int(msg[3])} 
                         elif msg[1] == 'team':
                             self.env.handeln_team(msg[2:])
                         else:

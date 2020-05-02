@@ -67,15 +67,16 @@ class GameMenu:
         is_client = False
         if username == cls.client.username:
             is_client = True
-        player = Player(char, username, team,is_client=is_client)
         if weapon == 'ak':
-            player.set_weapon(AK())
+            base_weapon = AK()
         elif weapon == 'crossbow':
-            player.set_weapon(Crossbow())
+            base_weapon = Crossbow()
         elif weapon == 'sniper':
-            player.set_weapon(Sniper())
+            base_weapon = Sniper()
         elif weapon == 'bazooka':
-            player.set_weapon(Bazooka())
+            base_weapon = Bazooka()
+
+        player = Player(char, username, team, is_client=is_client, base_weapon=base_weapon)
 
         cls.players.append({'player':player,'team':team})
 
