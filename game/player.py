@@ -120,11 +120,11 @@ class Player:
         self.check_jump_client(pressed)
 
     def react_events_server(self, comm):
-        try:
+        if 'angle' in comm.keys()
             self.orien = comm['angle']
             self.weapon.rotate(self.orien)
             self.weapon.update()
-        except: pass
+        
         if 'fire' in comm.keys():
             self.weapon.fire(self.orien, self.team_idx, from_server=True)
         
@@ -136,10 +136,10 @@ class Player:
         self.check_jump_server(comm)
 
         # check for a potential position update
-        try:
+        if 'x' in comm.keys():
             self.x = comm['x']
             self.y = comm['y']
-        except: pass
+        
 
     def check_jump_client(self, pressed):
         if pressed[pygame.K_SPACE] and self.can_jump:
