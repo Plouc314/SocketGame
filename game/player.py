@@ -120,7 +120,7 @@ class Player:
         self.check_jump_client(pressed)
 
     def react_events_server(self, comm):
-        if 'angle' in comm.keys()
+        if 'angle' in comm.keys():
             self.orien = comm['angle']
             self.weapon.rotate(self.orien)
             self.weapon.update()
