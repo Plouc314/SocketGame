@@ -170,8 +170,7 @@ class Player:
     def collision_items(self, items):
         for item in items:
             if item.collision(self.corners, just_touch=True):
-                # remove it
-                items.remove(item)
+                item.when_collide(self)
 
     def collisions(self,platforms):
         self.set_corners()

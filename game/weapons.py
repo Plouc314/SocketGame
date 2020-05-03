@@ -79,6 +79,7 @@ class AK(Weapon):
     
 
 class M4(Weapon):
+    # special weapon, has a lifetime
     original_img = pygame.transform.scale(m4, DIM_W)
     img = original_img
     rect = img.get_rect()
@@ -90,6 +91,17 @@ class M4(Weapon):
     firing_rate = 1
     def __init__(self):
         super().__init__()
+        # life time of the weapon 
+        self.lifetime = 150
+        self.player = None
+    
+    def update(self):
+        super().update()
+        self.lifetime -= 1
+        if self.lifetime == 0:
+            # once lifetime is finished -> set normal weapon back
+            self.player.set_weapon(self.player.base_weapon)
+
 
 class Sniper(Weapon):
     original_img = pygame.transform.scale(sniper, DIM_W)
@@ -125,7 +137,7 @@ class Crossbow(Weapon):
     s_bullets = scale((30, 30), dim.f)
     img_bullet = pygame.transform.scale(arrow, DIM_ARROW)
     gravity = 0.1 # power of the gravity on the bullet
-    damage = 100
+    damage = 40
     firing_rate = 15
     def __init__(self):
         super().__init__()

@@ -71,7 +71,6 @@ class PlayerBox:
 
 class Teams:
     teams = []
-    players = []
     used_colors = []
     can_add_team = True
     n_team_limit = 3
@@ -88,10 +87,8 @@ class Teams:
     
     @classmethod
     def set_players(cls):
-        cls.usernames = []
         for username in cls.client.env_users:
             cls.teams[0].create_player(username)
-            cls.usernames.append(username)
 
     @classmethod
     def create_team(cls, n):
@@ -165,12 +162,23 @@ class Teams:
         if new_team_idx != -1: # in the case -1, just delete the player
             team_to_add = cls.get_team(new_team_idx)
             team_to_add.create_player(username)
-
+        else:
+            # delete player
+            pass
+            
     @classmethod
     def get_team(cls, n):
         for team in cls.teams:
             if team.n == n:
                 return team
+
+    @classmethod
+    def reset(cls, keep_username=True):
+        cls.teams = []
+        cls.create_team(0)
+        cls.create_team(1)
+        if keep_username:
+            cls.teams[0].create_player(cls.username)
 
     @classmethod
     def display(cls):

@@ -132,9 +132,8 @@ class Client:
                         # disconnect
                         if self.in_env:
                             if self.env.in_game:
-                                self.env.stop_game(self.username)
-                            else:
-                                self.env.quit(self.username)
+                                self.env.quit_game(self.username)
+                            self.env.quit(self.username)
                         self.connected = False
                         if self.logged:
                             Interaction.disconn_friend(self)
@@ -161,7 +160,7 @@ class Client:
                             self.env.is_play()
                         elif msg[1] == 'quit':
                             if self.env.in_game:
-                                self.env.stop_game(self.username) # quit game
+                                self.env.quit_game(self.username) # quit game
                             else:
                                 self.env.quit(self.username) # quit env
                         elif msg[1] == 'dead':

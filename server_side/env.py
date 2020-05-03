@@ -39,7 +39,7 @@ class Env:
         self.usernames.append(new_client.username)
         self.n_clients += 1
     
-    def stop_game(self, username):
+    def quit_game(self, username):
         index = self.usernames.index(username)
         self.in_games[index] = False
 
@@ -207,6 +207,10 @@ class Env:
         # check if there is still someone
         if self.n_clients == 0:
             self.active = False
+        else:
+            # inform other user in env
+            for client in self.clients:
+                send(client.conn, f'env|quit|{username}')
 
     def is_play(self):
         self.n_player_game_sess += 1

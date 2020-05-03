@@ -214,6 +214,8 @@ class Menu:
         if self.button_exit.pushed(events):
             self.client.quit_game_or_env()
 
+        self.check_env_quit_players()
+
         if self.client.in_game_session:
             start_game(self.client)
             self.state = 'in game'
@@ -225,7 +227,7 @@ class Menu:
         self.input_username.text = ''
         self.chat_logged.reset()
         self.friends.reset()
-
+        self.teams.reset(keep_username=False)
 
     def run(self, events, pressed):
         if self.state == 'in game':
@@ -234,6 +236,7 @@ class Menu:
                 if self.client.in_env:
                     self.state = 'env'
                 else:
+                    self.teams.reset()
                     self.state = 'logged'
             run_game(pressed, events)
         elif self.state == 'main':
@@ -253,6 +256,7 @@ class Menu:
             self.react_events_env(events, pressed)
             if not self.client.in_env:
                 self.play_pushed = False
+                self.teams.reset()
                 self.state = 'logged'
         elif self.state == 'fail log':
             self.display_faillog()
@@ -261,3 +265,7 @@ class Menu:
             self.display_failsign()
             self.react_events_signup(events, pressed)
         
+    def check_env_quit_players(self):
+        for quit_username in self.client.quit_env_players:
+            self.teams.change_team(quit_username, -1)
+        self.client.quit_env_players = []
