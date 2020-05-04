@@ -1,5 +1,5 @@
 import pygame
-from base import dim, screen, C, dim
+from base import dim, screen, C
 from .weapons import M4
 from .helper import Delayed, Counter, mean
 from helper import scale
@@ -143,54 +143,6 @@ class Form(Platform):
         self.screen.blit(self.surf, self.pos)
         self.display_margin()
 
-class Item(Form):
-    MARGE_WIDTH = E(4)
-    func = None
-    def __init__(self, dim, pos, color, img, obj,amplitude=4):
-        super().__init__(dim, list(pos), color)
-        self.img = img
-        self.dh = 0
-        self.increment = 1/4
-        self.obj = obj
-        self.amplitude = amplitude
-
-    def update(self):
-        self.dh += self.increment
-        if abs(self.dh) == abs(self.amplitude):
-            if self.dh < 0:
-                self.increment = 1/4
-            else:
-                self.increment = -1/4
-        
-        self.pos[1] += int(self.dh)
-        self.set_corners(self.pos, self.dim)
-    
-    def when_collide(self, player):
-        self.func(self, player)
-
-    def display(self):
-        super().display()
-        screen.blit(self.img, self.pos)
-
-items = []
-
-DIM_ITEM = (E(80), E(80))
-
-img_m4 = pygame.image.load('game/imgs/m4.png')
-img_m4 = pygame.transform.scale(img_m4, DIM_ITEM)
-
-item1 = Item(DIM_ITEM, (E(400),E(1100)), C.LIGHT_GREY, img_m4, M4)
-
-# set action of collision
-def bonus_weapon(self, player):
-    new_weapon = self.obj()
-    new_weapon.player = player
-    player.set_weapon(new_weapon)
-
-# function that is executed when the item is touch
-item1.func = bonus_weapon
-
-items.append(item1)
 
 DIM_B = E(100)
 

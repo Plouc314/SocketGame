@@ -1,6 +1,7 @@
 from comm import send, receive_msg
 from interaction import Interaction
 import threading
+from random import choice
 from time import sleep
 
 class Env:
@@ -44,7 +45,8 @@ class Env:
         self.in_games[index] = False
         # send to client that one quit game
         for client in self.clients:
-            send(client.conn, f'env|quitgame|{username}')
+            if client.username != username:
+                send(client.conn, f'env|quitgame|{username}')
 
     def run(self):
         while self.active:
@@ -95,6 +97,7 @@ class Env:
         
         self.check_hit_player()
         self.check_dead_players()
+        self.check_items()
 
     def handeln_team(self, msg):
         if msg[0] == 'create':
@@ -114,6 +117,39 @@ class Env:
                     # send the team of the user
                     client.team = team_idx
 
+    def check_items(self):
+        to_pop = []
+        count_info = {} # count to see if each players send the info
+        for client in self.clients:
+            for mix in client.game_items.keys():
+                # check type of item
+                if 'health' in mix:
+                    if not mix in count_info.keys():
+                        count_info[mix] = {'count':1,'pos_idx':client.game_items[mix]['pos_idx']}
+                    else:
+                        count_info[mix]['count'] += 1
+                # reduce lifetime of infos
+                client.game_items[mix]['life'] -= 1
+                if client.game_items[mix]['life'] == 0:
+                    to_pop.append([client, mix])
+        
+        for client, mix in to_pop:
+            client.game_items.pop(mix)
+            send(client.conn, f'env|item|{mix}|0|0') # second zero means nothing (but has to be there for in the case where it's confirmed)
+
+        
+        # if every players send item -> confirm item
+        for mix, info in count_info.items():
+            if info['count'] == self.n_clients:
+                # set new pos idx
+                available_idx = [0,1,2]
+                available_idx.remove(info['pos_idx'])
+                new_pos_idx = choice(available_idx)
+                for client in self.clients:
+                    send(client.conn, f'env|item|{mix}|1|{new_pos_idx}') # 1 for confirmed
+                    try:
+                        client.game_items.pop(mix)
+                    except: pass
 
     def check_dead_players(self):
         # check for dead player

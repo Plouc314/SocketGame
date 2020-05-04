@@ -1,4 +1,4 @@
-from base import TextBox, Button, InputText, Cadre, C, Font, dim
+from base import TextBox, Button, InputText, Cadre, C, Font, dim, E
 from chat import Chat
 from friends import Friends
 from game.main import run_game, start_game
@@ -7,7 +7,7 @@ from helper import scale
 center_x = 1500 # base to be rescaled
 
 cposx = lambda pos: (dim.center_x - int(pos[0]/2))/dim.f # will be rescaled after
-E = lambda x: int(x*dim.f) 
+ 
 
 DIM_TITLE = scale((600,120), dim.f)
 POS_TITLE = scale((cposx(DIM_TITLE), 150), dim.f)

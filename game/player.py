@@ -170,11 +170,6 @@ class Player:
     def move_right(self):
         self.x = self.pos[0] + self.SPEED
 
-    def collision_items(self, items):
-        for item in items:
-            if item.collision(self.corners, just_touch=True):
-                item.when_collide(self)
-
     def collisions(self,platforms):
         self.set_corners()
         for platform in platforms:

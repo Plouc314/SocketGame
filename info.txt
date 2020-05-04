@@ -15,6 +15,7 @@ game/platform
 game/player
 game/score
 game/weapons
+game/items
 imgs
 game/imgs/ak.png
 game/imgs/m4.png
@@ -27,3 +28,4 @@ game/imgs/unicorn.png
 game/imgs/blood.png
 game/imgs/explosion.png
 game/imgs/cursor.png
+game/imgs/hospital.png

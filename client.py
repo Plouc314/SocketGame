@@ -25,6 +25,7 @@ class Client:
     hit_players = []
     team_changes = {}
     new_env_players = []
+    item_confirmations = {}
     left_env_players = [] # info for friends system
     quit_env_players = [] # info for env 
     ingame_quit_players = [] # for players leaving while game is running
@@ -148,6 +149,10 @@ class Client:
         else:
             if msg[1] == 'dead':
                 self.dead_players.append(msg[2])
+            elif msg[1] == 'item':
+                item_type = msg[2]
+                username = msg[3]
+                self.item_confirmations[username] = {'type':item_type, 'confirmed':int(msg[4]), 'pos_idx':int(msg[5])}
             elif msg[1] == 'hit':
                 self.hit_players.append({'username':msg[2],'damage':int(msg[3])})
             elif msg[1] == 'quitgame':
@@ -280,3 +285,6 @@ class Client:
 
     def send_hit_player(self, username, damage):
         self.send(f'env|hit|{username}|{damage}')
+
+    def send_item_health(self, username, pos_idx):
+        self.send(f'env|item|health|{username}|{pos_idx}')

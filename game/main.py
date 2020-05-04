@@ -1,4 +1,5 @@
-from .platform import blocks, items, display_cursor
+from .platform import blocks, display_cursor
+from .items import ItemSystem
 from .game_menu import GameMenu
 from .weapons import BulletSystem
 from .score import Score
@@ -14,11 +15,9 @@ def run(pressed, events):
     for block in blocks:
         block.display()
     
-    for item in items:
-        item.update()
-        item.display()
-
     Score.display_lives()
+
+    ItemSystem.update(Score)
     
     Score.check_win()
     if Score.ended:
@@ -30,7 +29,6 @@ def run(pressed, events):
             if not player.dead:
                 player.update(Score)
                 player.collisions(blocks)
-                player.collision_items(items)
                 player.display()
     
     BulletSystem.update(blocks, Score.players)
@@ -42,6 +40,7 @@ def start_game(client):
     GameMenu.init(client, Score)
     Score.client = client
     BulletSystem.client = client
+    ItemSystem.set_client(client)
 
 def run_game(pressed, events):
     if not GameMenu.ready:

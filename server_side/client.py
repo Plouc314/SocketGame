@@ -22,6 +22,7 @@ class Client:
         self.env_msgs = None
         self.game_dead_players = {}
         self.game_hit_players = {}
+        self.game_items = {}
         self.current_demand = None
         self.current_pos = None
     
@@ -170,6 +171,10 @@ class Client:
                             self.game_hit_players[msg[2]] = {'life':INFO_LIFETIME,'damage':int(msg[3])} 
                         elif msg[1] == 'team':
                             self.env.handeln_team(msg[2:])
+                        elif msg[1] == 'item':
+                            # concat username and type
+                            mix = msg[2] + '|' + msg[3]
+                            self.game_items[mix] = {'life':INFO_LIFETIME,'pos_idx':int(msg[4])} 
                         else:
                             self.env_msgs = msg[1:]
                     elif msg[0] == 'disconn':
