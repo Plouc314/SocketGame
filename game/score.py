@@ -20,6 +20,10 @@ DIM_BBACK = scale((200,100), dim.f)
 POS_BBACK = (dim.x - E(300), E(100))
 DIM_TTEAM = scale((400,80), dim.f)
 DIM_TP = scale((300,60), dim.f)
+DIM_TLEFT = scale((200, 200), dim.f)
+POS_TLEFT = (dim.x - E(300),E(220))
+
+LEFT_MSG_LIFETIME = 60
 
 class Score:
     text_end = TextBox(DIM_TEXTEND,C.WHITE, POS_TEXTEND,'', font=Font.f100, marge=True)
@@ -28,10 +32,12 @@ class Score:
                 font=Font.f70, marge=True)
     text_player = TextBox(DIM_TP, C.LIGHT_BROWN, (0,0),'',
                 font=Font.f50, centered=False, marge=True)
+    text_left = TextBox(DIM_TLEFT, C.WHITE, POS_TLEFT, '',font=Font.f30)
     winner = 0
     client_player = None
     client = None
     ended = False
+    left_players = {} # dict: username:lifetime
 
     @classmethod
     def set_teams(cls, teams):
@@ -50,6 +56,7 @@ class Score:
 
     @classmethod
     def display_lives(cls):
+        cls.display_left_players()
         dy = 0
         for u, team in cls.teams.items():
             cls.text_team.set_text(f'Team {u}')
@@ -98,6 +105,16 @@ class Score:
         cls.client.hit_players = []
 
     @classmethod
+    def check_leaving_players(cls):
+        for username in cls.client.ingame_quit_players:
+            team_idx, idx = cls.get_index(username)
+            # change leaving player state to 'have lost'
+            cls.teams[team_idx]['have_losts'][idx] = True
+            cls.teams[team_idx]['lives'][idx] = 0
+            cls.left_players[username] = LEFT_MSG_LIFETIME
+        cls.client.ingame_quit_players = []
+
+    @classmethod
     def have_lost(cls, other_player):
         for team in cls.teams.values():
             for i, player in enumerate(team['players']):
@@ -138,13 +155,16 @@ class Score:
 
     @classmethod
     def react_events(cls):
+        cls.check_leaving_players()
         cls.check_confirmed_hit()
         cls.check_confirmed_death()
         for comm in cls.client.game_msgs:
             username = comm['username']
             player = cls.get_player(username)
             if not cls.client_player is player:
-                player.react_events_server(comm)
+                try:
+                    player.react_events_server(comm)
+                except: print("[ERROR] Can't react to server frame message")
         cls.client.game_msgs = []
 
     @classmethod
@@ -164,6 +184,34 @@ class Score:
     def display_end(cls):
         cls.text_end.display()
         cls.button_back.display()
+
+    @classmethod
+    def display_left_players(cls):
+        text = ''
+        to_pop = []
+        for username in cls.left_players.keys():
+            cls.left_players[username] -= 1
+            if cls.left_players[username] == 0:
+                to_pop.append(username)
+            else:
+                text += f"{username} left game\n"
+        
+        # remove old left players
+        for username in to_pop:
+            cls.left_players.pop(username)
+
+        if text != '':
+            # update and display text
+            cls.text_left.set_text(text)
+            cls.text_left.display()
+
+    @classmethod
+    def get_index(cls, username):
+        ''' Return the index of the team and the index of the player in the team (u, i)'''
+        for u, team in cls.teams.items():
+            for i, player in enumerate(team['players']):
+                if player.username == username:
+                    return (u, i)
 
     @classmethod
     def reset(cls):

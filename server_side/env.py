@@ -42,6 +42,9 @@ class Env:
     def quit_game(self, username):
         index = self.usernames.index(username)
         self.in_games[index] = False
+        # send to client that one quit game
+        for client in self.clients:
+            send(client.conn, f'env|quitgame|{username}')
 
     def run(self):
         while self.active:

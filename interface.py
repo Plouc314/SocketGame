@@ -52,30 +52,23 @@ class C:
     LIGHT_BROWN = (225, 167, 69)
     DARK_PURPLE = (140, 17, 159)
     PURPLE = (180, 57, 199)
+    LIGHT_PURPLE = (210, 87, 229)
     YELLOW = (253, 240, 49)
 
 #set font
 if font_factor == 1.3:
     # windows font
-    fontname = "Ubuntu"
+    fontname = pygame.font.get_default_font()
 else:
     # mac and linux font
     fontname = "Arial"
 
 class Font:
-    f25 = pygame.font.SysFont( fontname, E(25* dim_factor*font_factor))
-    f30 = pygame.font.SysFont( fontname, E(30* dim_factor*font_factor))
-    f50 = pygame.font.SysFont( fontname, E(50* dim_factor*font_factor))
-    f70 = pygame.font.SysFont( fontname, E(70* dim_factor*font_factor))
-    f100 = pygame.font.SysFont(fontname, E(100*dim_factor*font_factor))
-    @classmethod
-    def init(cls, factor):
-        cls.f25 = pygame.font.SysFont( fontname, int(25* dim_factor*font_factor))
-        cls.f30 = pygame.font.SysFont( fontname, int(30* dim_factor*font_factor))
-        cls.f50 = pygame.font.SysFont( fontname, int(50* dim_factor*font_factor))
-        cls.f70 = pygame.font.SysFont( fontname, int(70* dim_factor*font_factor))
-        cls.f100 = pygame.font.SysFont(fontname, int(100*dim_factor*font_factor))
-
+    f25 = pygame.font.SysFont( fontname, E(25*font_factor))
+    f30 = pygame.font.SysFont( fontname, E(30*font_factor))
+    f50 = pygame.font.SysFont( fontname, E(50*font_factor))
+    f70 = pygame.font.SysFont( fontname, E(70*font_factor))
+    f100 = pygame.font.SysFont(fontname, E(100*font_factor))
 
 
 class Form(pygame.sprite.Sprite):
@@ -128,9 +121,15 @@ class Form(pygame.sprite.Sprite):
         self.BOTTOMLEFT = (pos[0], pos[1]+dim[1])
         self.BOTTOMRIGHT = (pos[0]+dim[0],pos[1]+dim[1])
 
-    def set_pos(self, pos):
-        self.pos = pos
-        self.set_corners(pos, self.dim)
+    def set_pos(self, pos, center=False):
+        if not center:
+            self.pos = pos
+            self.set_corners(pos, self.dim)
+        else:
+            pos = list(pos)
+            top_left = [int(pos[0]-self.dim[0]/2), int(pos[1]-self.dim[1]/2)]
+            self.pos = top_left
+            self.set_corners(top_left, self.dim)
 
 def center_text(dim_box, font, text):
     width, height = font.size(text)

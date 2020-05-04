@@ -27,6 +27,7 @@ class Client:
     new_env_players = []
     left_env_players = [] # info for friends system
     quit_env_players = [] # info for env 
+    ingame_quit_players = [] # for players leaving while game is running
     team_created = False
     is_dfr_valid = None
     is_del_fr = False
@@ -131,8 +132,7 @@ class Client:
                     self.new_env_players.append(msg[2])
                     self.env_users.append(msg[2])
                     self.n_env_users += 1
-                
-
+            
             elif msg[1] == 'ready':
                 self.ready_users.append({'username':msg[2],'weapon':msg[3],'char':int(msg[4]),'team':int(msg[5])})
             elif msg[1] == 'play':
@@ -150,6 +150,8 @@ class Client:
                 self.dead_players.append(msg[2])
             elif msg[1] == 'hit':
                 self.hit_players.append({'username':msg[2],'damage':int(msg[3])})
+            elif msg[1] == 'quitgame':
+                self.ingame_quit_players.append(msg[2])
             else:
                 msg = msg[1:]
                 try:

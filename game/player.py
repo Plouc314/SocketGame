@@ -1,6 +1,6 @@
 import pygame
 import math
-from base import screen, C, dim, Font
+from base import screen, C, dim, Font, TextBox
 from .helper import Delayed, Counter, cal_angle 
 from helper import scale
 E = lambda x: int(x*dim.f) 
@@ -13,8 +13,10 @@ chars = [char_1, char_2]
 
 DIM_P = scale((160,160), dim.f)
 DIM_HB = scale((130, 20), dim.f)
+DIM_TNAME = scale((140, 35), dim.f)
 
 TCOLORS = [C.DARK_BLUE, C.DARK_GREEN, C.DARK_PURPLE]
+LTCOLORS = [C.LIGHT_BLUE, C.LIGHT_GREEN, C.LIGHT_PURPLE] 
 
 SMOUSEBUTTONDOWN = 0
 SMOVELEFT = 1
@@ -48,7 +50,8 @@ class Player:
         self.username = username
         self.team_idx = team_idx
         self.SPAWN_POS = SPAWN_POSITIONS[team_idx]
-        self.text_username = Font.f30.render(username,True,TCOLORS[team_idx])
+        self.text_username = TextBox(DIM_TNAME, TCOLORS[team_idx],[0,0],username,
+                            font=Font.f30, marge=True, TEXT_COLOR=C.WHITE)
         self.pos = list(self.SPAWN_POS)
         self.health = 100
         self.set_corners()
@@ -230,9 +233,10 @@ class Player:
         screen.blit(red_surf, (self.pos[0]+E(15)+decal_x,self.pos[1]-E(30)))
 
     def display_username(self):
-        rect = self.text_username.get_rect()
-        rect.center = (int(self.pos[0] + self.dim[0]/2), self.pos[1]- E(50))
-        screen.blit(self.text_username, rect)
+        rect = self.text_username.surf.get_rect()
+        new_pos = (int(self.pos[0] + self.dim[0]/2), self.pos[1] - E(60))
+        self.text_username.set_pos(new_pos, center=True)
+        self.text_username.display()
 
     def display(self):
         screen.blit(self.img, self.pos)
