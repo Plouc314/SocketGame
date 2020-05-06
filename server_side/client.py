@@ -165,10 +165,10 @@ class Client:
                             else:
                                 self.env.quit(self.username) # quit env
                         elif msg[1] == 'dead':
-                            self.game_dead_players[msg[2]] = INFO_LIFETIME
+                            self.game_dead_players[msg[2]] = {'life':INFO_LIFETIME,'killer':msg[3]} 
                         elif msg[1] == 'hit':
                             # same idea as dead check system
-                            self.game_hit_players[msg[2]] = {'life':INFO_LIFETIME,'damage':int(msg[3])} 
+                            self.game_hit_players[msg[2]] = {'life':INFO_LIFETIME,'damage':int(msg[3]), 'shooter':msg[4]} 
                         elif msg[1] == 'team':
                             self.env.handeln_team(msg[2:])
                         elif msg[1] == 'item':

@@ -1,4 +1,4 @@
-1.01
+1.02
 interface
 main
 base
@@ -16,16 +16,11 @@ game/player
 game/score
 game/weapons
 game/items
+game/scoretable
 imgs
-game/imgs/ak.png
-game/imgs/m4.png
-game/imgs/bazooka.png
-game/imgs/sniper.png
 game/imgs/crossbow.png
 game/imgs/arrow.png
-game/imgs/c1.png
-game/imgs/unicorn.png
 game/imgs/blood.png
-game/imgs/explosion.png
-game/imgs/cursor.png
 game/imgs/hospital.png
+game/imgs/cross.png
+game/imgs/correct.png

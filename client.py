@@ -148,13 +148,13 @@ class Client:
                     self.team_created = True
         else:
             if msg[1] == 'dead':
-                self.dead_players.append(msg[2])
+                self.dead_players.append({'dead':msg[2], 'killer':msg[3]})
             elif msg[1] == 'item':
                 item_type = msg[2]
                 username = msg[3]
                 self.item_confirmations[username] = {'type':item_type, 'confirmed':int(msg[4]), 'pos_idx':int(msg[5])}
             elif msg[1] == 'hit':
-                self.hit_players.append({'username':msg[2],'damage':int(msg[3])})
+                self.hit_players.append({'username':msg[2],'damage':int(msg[3]), 'shooter':msg[4]})
             elif msg[1] == 'quitgame':
                 self.ingame_quit_players.append(msg[2])
             else:
@@ -271,8 +271,8 @@ class Client:
         
         self.send(msg)
 
-    def game_dead_player(self, username):
-        self.send(f'env|dead|{username}')
+    def game_dead_player(self, username, killer):
+        self.send(f'env|dead|{username}|{killer}') # dead|killer
 
     def quit_game_or_env(self):
         self.send(f'env|quit')
@@ -283,8 +283,8 @@ class Client:
     def send_new_team(self, n):
         self.send(f'env|team|change|{self.username}|{n}')
 
-    def send_hit_player(self, username, damage):
-        self.send(f'env|hit|{username}|{damage}')
+    def send_hit_player(self, username, damage, shooter):
+        self.send(f'env|hit|{username}|{damage}|{shooter}')
 
     def send_item_health(self, username, pos_idx):
         self.send(f'env|item|health|{username}|{pos_idx}')

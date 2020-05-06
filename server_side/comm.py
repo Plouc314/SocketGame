@@ -10,6 +10,7 @@ def receive_msg(conn):
             msg = conn.recv(msg_length).decode(FORMAT)
             return msg
         except:
+            sleep(0.01)
             print("[ERROR] Can't receive msg")
     return False
 

@@ -45,10 +45,10 @@ class Weapon:
         self.rect = self.img.get_rect()
         self.rect.center = (x, y) 
 
-    def fire(self, orien, team_idx, from_server=False):
+    def fire(self, orien, team_idx, username,from_server=False):
         if not self.delayed or from_server:
             new_bullet = Bullet(self.s_bullets, self.rect.center, self.v_bullets, orien, self.gravity,
-                     team_idx=team_idx, damage=self.damage, img=self.img_bullet)
+                     team_idx=team_idx, username=username, damage=self.damage, img=self.img_bullet)
             BulletSystem.bullets.append(new_bullet)
             self.delayed = True
             return 1 
@@ -185,7 +185,7 @@ class BulletSystem:
                         if player.touch_hitbox(bullet.rect.center): # bullet touch player
                             cls.touch(bullet)
                             # send msg to server and wait for confirmation
-                            cls.client.send_hit_player(player.username, bullet.damage)
+                            cls.client.send_hit_player(player.username, bullet.damage, bullet.username)
 
         for expl in cls.explosions:
             expl.display()
@@ -202,8 +202,9 @@ class BulletSystem:
 
 class Bullet(pygame.sprite.Sprite):
     original_img = None
-    def __init__(self, dim, pos, v, orien, gravity, team_idx=0, damage=0, img=None):
+    def __init__(self, dim, pos, v, orien, gravity, team_idx=0,username='', damage=0, img=None):
         self.team_idx = team_idx
+        self.username = username
         self.damage = damage
         self.gravity = gravity
         self.dim = dim

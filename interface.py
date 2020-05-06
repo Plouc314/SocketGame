@@ -141,12 +141,14 @@ def center_text(dim_box, font, text):
     return x_marge, y_marge
 
 class Cadre(Form):
-    def __init__(self, dim, color, pos):
+    def __init__(self, dim, color, pos, set_transparent=False):
         super().__init__(dim, color)
         self.pos = pos
         self.set_corners(pos, dim)
         self.set_highlight_color()
         self.MARGE_COLOR = self.high_color
+        if set_transparent:
+            self.surf.set_colorkey(color)
 
     def display(self):
         super().display(self.pos)
@@ -157,7 +159,9 @@ class Button(Form):
                     centered=True, font=Font.f50, image=False):
         super().__init__(dim, color)
         if image:
-            self.img = pygame.transform.scale(image, dim)
+            self.img = image
+            self.img_dim = image.get_rect().size
+            self.set_pos_img(pos)
             self.as_image = True
         else:
             self.as_image = False
@@ -171,6 +175,11 @@ class Button(Form):
         self.set_highlight_color()
         self.MARGE_COLOR = self.high_color
 
+    def set_pos_img(self, pos):
+        ''' create pos to display the img centered'''
+        dx = int((self.dim[0] - self.img_dim[0])/2)
+        dy = int((self.dim[1] - self.img_dim[1])/2)
+        self.img_pos = [pos[0]+dx, pos[1]+dy]
 
     def on_it(self):    
         mouse_pos = pygame.mouse.get_pos()
@@ -210,7 +219,7 @@ class Button(Form):
             font_text = self.font.render(self.text,True,self.TEXT_COLOR)
             self.screen.blit(font_text,(self.pos[0]+x_marge,self.pos[1]+y_marge))
         else:
-            self.screen.blit(self.img, self.pos)
+            self.screen.blit(self.img, self.img_pos)
 
 class TextBox(Form):
     def __init__(self, dim, background_color, pos, text='', 

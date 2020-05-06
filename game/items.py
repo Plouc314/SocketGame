@@ -10,13 +10,14 @@ class Item(Form):
     client = None
     active = True
     as_send = False
-    def __init__(self, dim, pos, color, img, obj, amplitude=4):
+    def __init__(self, dim, pos, color, img, obj, amplitude=4, pos_idx=1):
         super().__init__(dim, list(pos), color)
         self.img = img
         self.dh = 0
         self.increment = 1/4
         self.obj = obj
         self.amplitude = amplitude
+        self.pos_idx = pos_idx
 
     def update(self):
         self.dh += self.increment
@@ -65,7 +66,6 @@ items.append(item_m4)
 POS_HEALTHS = [(E(300),E(350)),(E(1400),E(1250)),(E(2400),E(50))]
 
 item_health = Item(DIM_ITEM, POS_HEALTHS[1],C.WHITE, img_health, None)
-setattr(item_health, 'pos_idx',1)
 
 def extra_health(self, player):
     if not self.as_send:

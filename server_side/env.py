@@ -22,6 +22,7 @@ class Env:
             usernames = self.usernames.copy()
             usernames.remove(client.username)
             usernames = '|'.join(usernames)
+            print('SEND ENV', client.username)
             send(client.conn, f'env|conn|{usernames}')
         # start thread for run func
         run_thread = threading.Thread(target=self.run)
@@ -156,24 +157,25 @@ class Env:
         dead_players = {}
         info_to_pop = []
         for client in self.clients:
-            for username in client.game_dead_players.keys():
+            for username, info in client.game_dead_players.items():
                 if not username in dead_players.keys():
-                    dead_players[username] = 1
+                    dead_players[username] = {'count':1,'killer':info['killer']}
                 else:
-                    dead_players[username] += 1
+                    dead_players[username]['count'] += 1
                 # reduce lifetime of infos
-                client.game_dead_players[username] -= 1
-                if client.game_dead_players[username] == 0:
+                client.game_dead_players[username]['life'] -= 1
+                if client.game_dead_players[username]['life'] == 0:
                     info_to_pop.append([client, username])
         
         for client, username in info_to_pop:
             client.game_dead_players.pop(username)
 
         # if every player send death -> confirm death
-        for username, n_msg in dead_players.items():
-            if n_msg == self.n_clients:
+        for username, info in dead_players.items():
+            if info['count'] == self.n_clients:
                 for client in self.clients:
-                    send(client.conn, f'env|dead|{username}')
+                    killer = info['killer']
+                    send(client.conn, f'env|dead|{username}|{killer}')
                     try:
                         client.game_dead_players.pop(username)
                     except: pass
@@ -185,7 +187,7 @@ class Env:
         for client in self.clients:
             for username, info in client.game_hit_players.items():
                 if not username in hit_players.keys():
-                    hit_players[username] = {'count':1,'damage': info['damage']}
+                    hit_players[username] = {'count':1,'damage': info['damage'], 'shooter':info['shooter']}
                 else:
                     hit_players[username]['count'] += 1
                 # reduce lifetime of infos
@@ -201,7 +203,8 @@ class Env:
             if info['count'] == self.n_clients:
                 for client in self.clients:
                     damage = info['damage']
-                    send(client.conn, f'env|hit|{username}|{damage}')
+                    shooter = info['shooter']
+                    send(client.conn, f'env|hit|{username}|{damage}|{shooter}')
                     try:
                         client.game_hit_players.pop(username)
                     except: pass

@@ -97,7 +97,7 @@ class Player:
         fire, left, right, jump = 0,0,0,0
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                as_shot = self.active_weapon.fire(self.orien, self.team_idx)
+                as_shot = self.active_weapon.fire(self.orien, self.team_idx, self.username)
                 fire = as_shot
 
         if pressed[pygame.K_a]:
@@ -129,7 +129,7 @@ class Player:
             self.active_weapon.update()
         
         if 'fire' in comm.keys():
-            self.active_weapon.fire(self.orien, self.team_idx, from_server=True)
+            self.active_weapon.fire(self.orien, self.team_idx, self.username, from_server=True)
         
         if comm['left']:
             self.move_left()
@@ -188,15 +188,10 @@ class Player:
         
         self.collision_bordure()
 
-    def update(self, Score):
+    def update(self):
         # gravity
         self.y = self.pos[1] + E(int(1/2*self.dh*abs(self.dh)))
         self.dh += 1
-
-        # check if player is dead
-        if self.health <= 0:
-            self.health = 1 # temporary set a health -> waiting for the death confirmation
-            Score.is_dead(self)
 
     def collision_bordure(self):
         # check screen bordure
@@ -217,6 +212,13 @@ class Player:
         if pos[1] > self.TOPLEFT[1] and pos[1] < self.BOTTOMLEFT[1]:
             if pos[0] > self.TOPLEFT[0] and pos[0] < self.TOPRIGHT[0]:
                 return True
+
+    def get_hit(self, damage, shooter, Score):
+        self.health -= damage
+        # check if player is dead
+        if self.health <= 0:
+            self.health = 1 # temporary set a health -> waiting for the death confirmation
+            Score.is_dead(self, shooter)
 
     def display_health(self):
         # get red part

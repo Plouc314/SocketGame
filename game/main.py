@@ -27,7 +27,7 @@ def run(pressed, events):
         Score.react_events()
         for player in Score.players:
             if not player.dead:
-                player.update(Score)
+                player.update()
                 player.collisions(blocks)
                 player.display()
     

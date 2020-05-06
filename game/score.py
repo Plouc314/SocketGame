@@ -1,5 +1,6 @@
 import pygame
 from base import screen, Font, C, dim, TextBox, Button
+from .scoretable import ScoreTable
 from helper import scale, timer
 from time import sleep
 
@@ -15,13 +16,14 @@ TCOLORS = [C.BLUE, C.GREEN, C.PURPLE]
 
 POS_SC = scale((100,100), dim.f)
 DIM_TEXTEND = scale((800, 120), dim.f)
-POS_TEXTEND = scale((cposx(DIM_TEXTEND),cposy(DIM_TEXTEND)), dim.f)
+POS_TEXTEND = scale((cposx(DIM_TEXTEND),cposy(DIM_TEXTEND)-E(200)), dim.f)
 DIM_BBACK = scale((200,100), dim.f)
 POS_BBACK = (dim.x - E(300), E(100))
 DIM_TTEAM = scale((400,80), dim.f)
 DIM_TP = scale((300,60), dim.f)
 DIM_TLEFT = scale((200, 200), dim.f)
 POS_TLEFT = (dim.x - E(300),E(220))
+POS_SCORETY = POS_TEXTEND[1] + DIM_TEXTEND[1]
 
 LEFT_MSG_LIFETIME = 60
 
@@ -33,6 +35,7 @@ class Score:
     text_player = TextBox(DIM_TP, C.LIGHT_BROWN, (0,0),'',
                 font=Font.f50, centered=False, marge=True)
     text_left = TextBox(DIM_TLEFT, C.WHITE, POS_TLEFT, '',font=Font.f30)
+    scoretable = ScoreTable
     winner = 0
     client_player = None
     client = None
@@ -48,7 +51,8 @@ class Score:
             cls.team_idxs.append(i)
             lives = [3 for player in players]
             have_losts = [False for player in players]
-            d = {'players':players,'lives':lives, 'have_losts':have_losts}
+            kill_count = [0 for player in players]
+            d = {'players':players,'lives':lives, 'have_losts':have_losts, 'kill_count':kill_count}
             cls.teams[i] = d
             cls.players.extend(players)
         cls.n_team = len(cls.teams)
@@ -74,19 +78,21 @@ class Score:
                 dy += E(80)
     
     @classmethod
-    def is_dead(cls, other_player):
+    def is_dead(cls, other_player, killer_username):
         for team in cls.teams.values():
             for i, player in enumerate(team['players']):
                 if player is other_player:
-                    cls.client.game_dead_player(player.username)
+                    cls.client.game_dead_player(player.username, killer_username)
                     
     @classmethod
     def check_confirmed_death(cls):
-        for username in cls.client.dead_players:
-            dead_player = cls.get_player(username)
+        for info in cls.client.dead_players:
+            dead_player = cls.get_player(info['dead'])
             for team in cls.teams.values():
                 for i, player in enumerate(team['players']):
                     if player is dead_player:
+                        team_idx, idx = cls.get_index(info['killer'])
+                        cls.teams[team_idx]['kill_count'][idx] += 1 #increase kill count of killer player
                         player.dead = True
                         team['lives'][i] -= 1
                         if team['lives'][i] == 0:
@@ -100,7 +106,7 @@ class Score:
     def check_confirmed_hit(cls):
         for info in cls.client.hit_players:
             hit_player = cls.get_player(info['username'])
-            hit_player.health -= info['damage']
+            hit_player.get_hit(info['damage'], info['shooter'], cls)
 
         cls.client.hit_players = []
 
@@ -140,6 +146,8 @@ class Score:
                 if v == False:
                     cls.winner = cls.team_idxs[i]
                     cls.ended = True
+                    pos_x = cposx((E(500)*cls.n_team,0))
+                    cls.scoretable.init((pos_x, POS_SCORETY), cls)
                     cls.text_end.set_text(f'Winner Team {cls.winner}')
                     # set color
                     if cls.winner == cls.client_team:
@@ -184,6 +192,7 @@ class Score:
     def display_end(cls):
         cls.text_end.display()
         cls.button_back.display()
+        cls.scoretable.display()
 
     @classmethod
     def display_left_players(cls):

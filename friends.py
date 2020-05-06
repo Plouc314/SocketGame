@@ -2,10 +2,17 @@ from base import TextBox, InputText, Button, Cadre, C, Font, dim
 from helper import scale
 import pygame
 
+DIM_IMG = scale((40,40), dim.f)
 DIM_DFR_B = scale((100,60), dim.f)
 DIM_TY = scale(60,dim.f)
 MARGE = scale(200,dim.f)
 LMARGE = int(MARGE/2)
+
+img_cross = pygame.image.load('game/imgs/cross.png')
+img_cross = pygame.transform.scale(img_cross, DIM_IMG)
+
+img_vu = pygame.image.load('game/imgs/correct.png')
+img_vu = pygame.transform.scale(img_vu, DIM_IMG)
 
 class FriendDemand:
     def __init__(self, x_dim, pos, username):
@@ -13,8 +20,8 @@ class FriendDemand:
         self.username = username
         text = f'Friend demand: {username}'
         self.text = TextBox((x_dim-MARGE,DIM_TY),C.LIGHT_GREY,pos,text,font=Font.f30)
-        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-MARGE,pos[1]),'Yes',font=Font.f30)
-        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-LMARGE,pos[1]),'No',font=Font.f30)
+        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-2*DIM_DFR_B[0],pos[1]),image=img_vu)
+        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-DIM_DFR_B[0],pos[1]),image=img_cross)
 
     def display(self):
         self.text.display()
@@ -27,8 +34,8 @@ class Invitation:
         self.username = username
         text = f'Invitation from: {username}'
         self.text = TextBox((x_dim-MARGE,DIM_TY),C.LIGHT_GREY,pos,text,font=Font.f30)
-        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-MARGE,pos[1]),'Yes',font=Font.f30)
-        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-LMARGE,pos[1]),'No',font=Font.f30)
+        self.button_yes = Button(DIM_DFR_B,C.LIGHT_GREEN,(pos[0]+x_dim-2*DIM_DFR_B[0],pos[1]),image=img_vu)
+        self.button_no = Button(DIM_DFR_B,C.LIGHT_RED,(pos[0]+x_dim-DIM_DFR_B[0],pos[1]),image=img_cross)
 
     def display(self):
         self.text.display()

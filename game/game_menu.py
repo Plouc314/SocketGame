@@ -23,10 +23,15 @@ POS_BCWX = dim.center_x - E(550)
 fpath = '/home/alexandre/Documents/python/socket/game/game/imgs/'
 
 img_ak = pygame.image.load('game/imgs/ak.png')
+img_ak = pygame.transform.scale(img_ak, DIM_BCHOOSEW)
 img_m4 = pygame.image.load('game/imgs/m4.png')
+img_m4 = pygame.transform.scale(img_m4, DIM_BCHOOSEW)
 img_sniper = pygame.image.load('game/imgs/sniper.png')
+img_sniper = pygame.transform.scale(img_sniper, DIM_BCHOOSEW)
 img_bazooka = pygame.image.load('game/imgs/bazooka.png')
+img_bazooka = pygame.transform.scale(img_bazooka, DIM_BCHOOSEW)
 img_crossbow = pygame.image.load('game/imgs/crossbow.png')
+img_crossbow = pygame.transform.scale(img_crossbow, DIM_BCHOOSEW)
 
 class GameMenu:
     ready = False
