@@ -12,9 +12,9 @@ ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
-
 class Client:
     client = client
+    stats = None
     fr_states = {}
     fr_demands = []
     friends = {}
@@ -114,6 +114,8 @@ class Client:
                         self.is_dfr_valid = False
                 elif msg[0] == 'inv':
                     self.invs.append(msg[1])
+                elif msg[0] == 'stats':
+                    self.stats = {'kills':int(msg[1]),'deaths':int(msg[2]), 'played':int(msg[3])}
                                     
     def handeln_env(self, msg):
         if msg[1] == 'stop':
@@ -207,11 +209,12 @@ class Client:
             msg_length = client.recv(HEADER).decode(FORMAT)
             if msg_length:
                 received = True
-                msg_length = int(msg_length)
                 try:
+                    msg_length = int(msg_length)
                     msg = client.recv(msg_length).decode(FORMAT)
                     return msg
                 except:
+                    sleep(0.01)
                     print('[ERROR] failure to receive the message: aborting...')
     
     def disconn(self):
@@ -288,3 +291,7 @@ class Client:
 
     def send_item_health(self, username, pos_idx):
         self.send(f'env|item|health|{username}|{pos_idx}')
+    
+    def send_results(self, kills, deaths):
+        self.send(f'r|{kills}|{deaths}')
+        

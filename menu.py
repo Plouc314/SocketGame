@@ -1,6 +1,7 @@
 from base import TextBox, Button, InputText, Cadre, C, Font, dim, E
 from chat import Chat
 from friends import Friends
+from stats import Stats
 from game.main import run_game, start_game
 from helper import scale
 
@@ -36,6 +37,7 @@ DIM_TWAIT = scale((500,60), dim.f)
 POS_TWAIT = (scale(cposx(DIM_TWAIT), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
 DIM_BEXIT = scale((200,80), dim.f)
 POS_BEXIT = (dim.x - E(300), E(100))
+POS_STATSY = POS_TITLE[1] + E(400)
 MARGE = scale(100, dim.f)
 LMARGE = scale(50, dim.f)
 
@@ -84,8 +86,9 @@ class Menu:
                     POS_BPLAY, 'Play') 
         self.chat_logged = Chat(DIM_CHAT, (MARGE,dim.y-DIM_CHAT[1]-MARGE), self.client)
         self.friends = Friends(DIM_FR, (dim.x-DIM_FR[0]-MARGE, E(250)), self.client)
-        self.button_disconn = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (LMARGE, MARGE+DIM_LOGINP[1])
+        self.button_disconn = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (LMARGE + E(250), MARGE+DIM_LOGINP[1])
                         ,'Disconnect',font=Font.f30)
+        self.button_account = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (LMARGE, MARGE+DIM_LOGINP[1]),'Account',font=Font.f30)
         # state env
         self.title_env = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Env', font=Font.f100)
         self.text_wating = TextBox(DIM_TWAIT,C.WHITE, POS_TWAIT,
@@ -93,6 +96,11 @@ class Menu:
         self.button_exit = Button(DIM_BEXIT, C.LIGHT_BLUE, POS_BEXIT, 'Exit', font=Font.f30)
         self.teams = Teams
         self.teams.init(POS_TEAMS,DIM_TEAMS, client)
+        # state account
+        self.title_account = TextBox(DIM_TITLE, C.WHITE, (POS_TITLE[0], POS_TITLE[1] + E(100)),'', font=Font.f100)
+        Stats.init(client, POS_STATSY)
+        self.Stats = Stats
+
 
     def display_main(self):
         self.title_main.display()
@@ -121,6 +129,7 @@ class Menu:
         self.title_logged.display()
         self.text_username.display()
         self.button_disconn.display()
+        self.button_account.display()
         self.button_play.display()
         self.chat_logged.display()
         self.friends.display()
@@ -145,6 +154,11 @@ class Menu:
     def display_failsign(self):
         self.display_signup()
         self.text_failsign.display()
+    
+    def display_account(self):
+        self.title_account.display()
+        self.button_back.display()
+        self.Stats.display()
 
     def react_events_main(self, events, pressed):
         if self.button_login.pushed(events):
@@ -164,6 +178,7 @@ class Menu:
                 self.state = 'logged'
                 self.text_username.set_text(username)
                 self.teams.set_username(username)
+                self.title_account.set_text(username)
                 self.chat_logged.activate()
             else:
                 self.state = 'fail log'
@@ -182,6 +197,7 @@ class Menu:
                 if self.client.sign_up(username, password):
                     self.state = 'logged'
                     self.text_username.set_text(username)
+                    self.title_account.set_text(username)
                     self.teams.set_username(username)
                     self.chat_logged.activate()
                 else:
@@ -193,6 +209,10 @@ class Menu:
             print('play')
         if self.button_disconn.pushed(events):
             self.disconn()
+        if self.button_account.pushed(events):
+            self.state = 'account'
+            self.Stats.set_stats()
+
         self.friends.react_events(events, pressed)
         # check for env 
         if self.client.in_env:
@@ -213,12 +233,17 @@ class Menu:
 
         if self.button_exit.pushed(events):
             self.client.quit_game_or_env()
+            self.state = 'logged'
 
         self.check_env_quit_players()
 
         if self.client.in_game_session:
             start_game(self.client)
             self.state = 'in game'
+
+    def react_events_account(self, events, pressed):
+        if self.button_back.pushed(events):
+            self.state = 'logged'
 
     def disconn(self):
         self.client.disconn()
@@ -264,6 +289,9 @@ class Menu:
         elif self.state == 'fail sign':
             self.display_failsign()
             self.react_events_signup(events, pressed)
+        elif self.state == 'account':
+            self.display_account()
+            self.react_events_account(events, pressed)
         
     def check_env_quit_players(self):
         for quit_username in self.client.quit_env_players:

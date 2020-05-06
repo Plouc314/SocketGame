@@ -19,10 +19,10 @@ def run(pressed, events):
 
     ItemSystem.update(Score)
     
-    Score.check_win()
     if Score.ended:
         Score.run_end(events, pressed)
     else:
+        Score.check_win()
         # react to communications from server
         Score.react_events()
         for player in Score.players:

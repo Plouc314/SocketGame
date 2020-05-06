@@ -61,7 +61,7 @@ def bonus_weapon(self, player):
 
 # function that is executed when the item is touch
 item_m4.func = bonus_weapon
-items.append(item_m4)
+#items.append(item_m4)
 
 POS_HEALTHS = [(E(300),E(350)),(E(1400),E(1250)),(E(2400),E(50))]
 

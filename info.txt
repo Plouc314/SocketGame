@@ -8,6 +8,7 @@ chat
 helper
 menu
 teams
+stats
 game/game_menu
 game/main
 game/helper 

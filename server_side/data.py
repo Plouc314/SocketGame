@@ -1,4 +1,5 @@
 import pandas as pd
+from comm import send
 from helper import cumsum, filt
 
 def load_user_data():
@@ -8,6 +9,7 @@ def load_user_data():
     data.fillna('', inplace=True)
     data['friends'] = data['friends'].map(to_list).map(filt)
     data['demands'] = data['demands'].map(to_list).map(filt)
+    data = data.astype({'kills': 'int64', 'deaths': 'int64', 'played':'int64'})
     return data
 
 def store_user_data():
@@ -25,3 +27,11 @@ class Data:
         if cls.users[cls.users['username'] == username].size != 0:
             return True
         return False
+    
+    @classmethod
+    def send_stats(cls, username, conn):
+        line = Data.users[Data.users['username'] == username] 
+        kills = line['kills'].values[0]
+        deaths = line['deaths'].values[0]
+        played = line['played'].values[0]
+        send(conn, f'stats|{kills}|{deaths}|{played}')

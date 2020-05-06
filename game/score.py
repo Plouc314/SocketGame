@@ -146,8 +146,11 @@ class Score:
                 if v == False:
                     cls.winner = cls.team_idxs[i]
                     cls.ended = True
-                    pos_x = cposx((E(500)*cls.n_team,0))
+                    # set score table
+                    pos_x = E(cposx((500*cls.n_team,0)))
                     cls.scoretable.init((pos_x, POS_SCORETY), cls)
+                    # send result to server
+                    cls.send_results()
                     cls.text_end.set_text(f'Winner Team {cls.winner}')
                     # set color
                     if cls.winner == cls.client_team:
@@ -155,12 +158,6 @@ class Score:
                     else:
                         cls.text_end.set_color(C.LIGHT_RED, marge=True)
         
-    @classmethod
-    def get_player(cls, username):
-        for player in cls.players:
-            if player.username == username:
-                return player
-
     @classmethod
     def react_events(cls):
         cls.check_leaving_players()
@@ -215,12 +212,25 @@ class Score:
             cls.text_left.display()
 
     @classmethod
+    def get_player(cls, username):
+        for player in cls.players:
+            if player.username == username:
+                return player
+
+    @classmethod
     def get_index(cls, username):
         ''' Return the index of the team and the index of the player in the team (u, i)'''
         for u, team in cls.teams.items():
             for i, player in enumerate(team['players']):
                 if player.username == username:
                     return (u, i)
+    
+    @classmethod
+    def send_results(cls):
+        team_idx, idx = cls.get_index(cls.client_player.username)
+        kills = cls.teams[team_idx]['kill_count'][idx]
+        deaths = 3 - cls.teams[team_idx]['lives'][idx]
+        cls.client.send_results(kills, deaths)
 
     @classmethod
     def reset(cls):
@@ -230,4 +240,5 @@ class Score:
         cls.ended = False
         cls.teams = {}
         cls.players = []
+        cls.losts = []
 

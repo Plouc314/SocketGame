@@ -46,7 +46,9 @@ class Client:
             send(self.conn, 'taken')
             return
         else:
-            Data.users = Data.users.append({'username':username,'password':password.strip(),'friends':[],'demands':[]}, ignore_index=True)
+            Data.users = Data.users.append(
+                {'username':username,'password':password.strip(),'friends':[],'demands':[],'kills':0,'deaths':0,'played':0}
+                    , ignore_index=True)
             store_user_data()
             send(self.conn, 'signed')
             sleep(.1) # let the time to the client to start the separated thread
@@ -61,6 +63,7 @@ class Client:
         self.index = line.index[0]
         Interaction.manage_friends(self)
         self.look_for_fr_request()
+        Data.send_stats(username, self.conn)
 
     def look_for_fr_request(self):
         demands = Data.users[Data.users['username'] == self.username]['demands'].values[0]
@@ -100,6 +103,13 @@ class Client:
         if Interaction.is_connected(username):
             other_client = Interaction.get_client(username)
             send(other_client.conn, f'inv|{self.username}')
+
+    def update_stats(self, kills, deaths):
+        Data.users.loc[self.index, 'kills'] += kills
+        Data.users.loc[self.index, 'deaths'] += deaths
+        Data.users.loc[self.index, 'played'] += 1
+        # send new stats to user
+        Data.send_stats(self.username, self.conn)
 
     def create_env(self, username):
         # check other is conn
@@ -154,6 +164,7 @@ class Client:
                             print(f'[{self.username}] {msg}')
                     else:
                         print(f'[{self.username}] {msg}')
+                    
                     msg = msg.split('|')
                     # env msg 
                     if msg[0] == 'env':
@@ -182,6 +193,9 @@ class Client:
                         self.logged = False
                         # send to client to interrupt inf loop
                         send(self.conn, 'disconn') 
+                    # result of a game (kills, deaths)
+                    elif msg[0] == 'r':
+                        self.update_stats(int(msg[1]), int(msg[2]))
                     # chat message
                     elif msg[0] == 'chat': 
                         self.chat_current_msg = msg[1]
