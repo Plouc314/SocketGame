@@ -10,7 +10,7 @@ screen.fill(C.WHITE)
 pygame.display.set_caption('Game')
 
 # icon img
-icon = pygame.image.load('game/imgs/flag.png')
+icon = pygame.image.load('game/imgs/bullet.png')
 icon = pygame.transform.scale(icon, (E(32),E(32)))
 pygame.display.set_icon(icon)
 
