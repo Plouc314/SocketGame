@@ -25,3 +25,4 @@ game/imgs/blood.png
 game/imgs/hospital.png
 game/imgs/cross.png
 game/imgs/correct.png
+game/imgs/flag.png

@@ -32,7 +32,7 @@ POS_BDONE = scale((center_x+240, 750), dim.f)
 POS_BBACK = scale((100,100), dim.f)
 POS_BPLAY = (scale(cposx(DIM_MAIN_B), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
 DIM_TEAMS = scale((400, 600), dim.f)
-POS_TEAMS = scale((300,250), dim.f)
+POS_TEAMS = scale((300,280), dim.f)
 DIM_TWAIT = scale((500,60), dim.f)
 POS_TWAIT = (scale(cposx(DIM_TWAIT), dim.f),POS_TITLE[1]+2*DIM_MAIN_B[1])
 DIM_BEXIT = scale((200,80), dim.f)
@@ -49,7 +49,7 @@ class Menu:
         self.client = client
         self.state = 'main'
         # state main
-        self.title_main = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Title', font=Font.f100)
+        self.title_main = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'SocketGame', font=Font.f100)
 
         self.button_login = Button(DIM_MAIN_B, C.LIGHT_BLUE,
                                 POS_BLOG,'Log in')
@@ -233,13 +233,18 @@ class Menu:
 
         if self.button_exit.pushed(events):
             self.client.quit_game_or_env()
-            self.state = 'logged'
+            self.quit_env()
 
         self.check_env_quit_players()
 
         if self.client.in_game_session:
             start_game(self.client)
             self.state = 'in game'
+
+    def quit_env(self):
+        self.play_pushed = False
+        self.teams.reset()
+        self.state = 'logged'
 
     def react_events_account(self, events, pressed):
         if self.button_back.pushed(events):
@@ -257,12 +262,11 @@ class Menu:
     def run(self, events, pressed):
         if self.state == 'in game':
             if not self.client.in_game_session:
-                self.play_pushed = False
                 if self.client.in_env:
                     self.state = 'env'
+                    self.play_pushed = False
                 else:
-                    self.teams.reset()
-                    self.state = 'logged'
+                    self.quit_env()
             run_game(pressed, events)
         elif self.state == 'main':
             self.display_main()
@@ -280,9 +284,7 @@ class Menu:
             self.display_env()
             self.react_events_env(events, pressed)
             if not self.client.in_env:
-                self.play_pushed = False
-                self.teams.reset()
-                self.state = 'logged'
+                self.quit_env()
         elif self.state == 'fail log':
             self.display_faillog()
             self.react_events_login(events, pressed)

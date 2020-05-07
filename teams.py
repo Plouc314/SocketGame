@@ -87,6 +87,7 @@ class Teams:
     
     @classmethod
     def set_players(cls):
+        print('SET PLAYERS', cls.client.env_users)
         for username in cls.client.env_users:
             cls.teams[0].create_player(username)
 
@@ -174,9 +175,9 @@ class Teams:
 
     @classmethod
     def reset(cls, keep_username=True):
-        cls.teams = []
-        cls.create_team(0)
-        cls.create_team(1)
+        print('RESET')
+        for team in cls.teams:
+            team.players = []
         if keep_username:
             cls.teams[0].create_player(cls.username)
 

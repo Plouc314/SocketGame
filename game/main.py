@@ -41,6 +41,7 @@ def start_game(client):
     Score.client = client
     BulletSystem.client = client
     ItemSystem.set_client(client)
+    client.ingame_quit_players = []
 
 def run_game(pressed, events):
     if not GameMenu.ready:

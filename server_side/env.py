@@ -22,7 +22,6 @@ class Env:
             usernames = self.usernames.copy()
             usernames.remove(client.username)
             usernames = '|'.join(usernames)
-            print('SEND ENV', client.username)
             send(client.conn, f'env|conn|{usernames}')
         # start thread for run func
         run_thread = threading.Thread(target=self.run)
