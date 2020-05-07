@@ -9,9 +9,9 @@ screen = pygame.display.set_mode(dim.window)
 screen.fill(C.WHITE)
 pygame.display.set_caption('Game')
 
-# icon img
-icon = pygame.image.load('game/imgs/bullet.png')
-icon = pygame.transform.scale(icon, (E(32),E(32)))
+# icon img - just remove default img
+icon = pygame.Surface((32,32))
+icon.fill(C.WHITE)
 pygame.display.set_icon(icon)
 
 set_screen(screen)
