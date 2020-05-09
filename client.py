@@ -197,25 +197,31 @@ class Client:
     
     def send(self,msg):
         message = msg.encode(FORMAT)
-        msg_length = len(message)
-        send_length = str(msg_length).encode(FORMAT)
-        send_length += b' ' * (HEADER - len(send_length))
-        client.send(send_length)
+        message += b' ' * (HEADER - len(message))
+        #msg_length = len(message)
+        #send_length = str(msg_length).encode(FORMAT)
+        #send_length += b' ' * (HEADER - len(send_length))
+        #client.send(send_length)
         client.send(message)
 
     def receive_msg(self):
         received = False
-        while not received and self.connected:        
-            msg_length = client.recv(HEADER).decode(FORMAT)
-            if msg_length:
+        while not received and self.connected:  
+            msg = client.recv(150).decode(FORMAT).strip()  
+            if msg:
                 received = True
-                try:
-                    msg_length = int(msg_length)
-                    msg = client.recv(msg_length).decode(FORMAT)
-                    return msg
-                except:
-                    sleep(0.01)
-                    print('[ERROR] failure to receive the message: aborting...')
+                return msg   
+        #    msg_length = client.recv(HEADER).decode(FORMAT)
+        #    if msg_length:
+        #        received = True
+        #        try:
+        #            msg_length = int(msg_length)
+        #            msg = client.recv(msg_length).decode(FORMAT)
+        #            return msg
+        #        except:
+        #            sleep(0.01)
+        #            print('[ERROR] failure to receive the message: aborting...')
+        
     
     def disconn(self):
         self.logged = False

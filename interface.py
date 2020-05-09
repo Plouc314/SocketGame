@@ -287,9 +287,13 @@ cursor_deco = Delayed(20)
 
 class InputText(Button):
     bool_cursor = True
-    def __init__(self, dim, pos, color, TEXT_COLOR=(0,0,0), centered=False, font=Font.f30):
+    def __init__(self, dim, pos, color, TEXT_COLOR=(0,0,0), centered=False, font=Font.f30, limit=None, cache=False):
         super().__init__(dim, color, pos, TEXT_COLOR=TEXT_COLOR, centered=centered, font=font)
         self.active = False
+        self.limit = limit # max char
+        self.cache = cache # if true text -> ***
+        self.text = '' # text that is display
+        self.content = '' # text that is input
     
     @get_input_deco
     def get_input(self, events, pressed):
@@ -312,17 +316,26 @@ class InputText(Button):
 
         key = get_pressed_key(pressed)
         if key:
-            self.text += key
+            self.content += key
+            if self.limit:
+                if len(self.content) > self.limit:
+                    self.content = self.content[:-1]
+                
             try:
-                center_text(self.dim, self.font, self.text)
+                center_text(self.dim, self.font, self.content)
             except ValueError:
-                self.text = self.text[:-1]
+                self.content = self.content[:-1]
             return True
         
         if pressed[pygame.K_BACKSPACE]:
-            self.text = self.text[:-1]
+            self.content = self.content[:-1]
             return True
     
+        if self.cache:
+            self.text = '$' * len(self.content)
+        else:
+            self.text = self.content
+
         return False
     
     def display_text_cursor(self):
@@ -379,7 +392,59 @@ class Interface:
 
 
 def get_pressed_key(pressed):
-    if pressed[pygame.K_a]:
+    if pressed[pygame.K_a] and pressed[pygame.K_LSHIFT]:
+        return 'A'
+    elif pressed[pygame.K_b] and pressed[pygame.K_LSHIFT]:
+        return 'B'
+    elif pressed[pygame.K_c] and pressed[pygame.K_LSHIFT]:
+        return 'C'
+    elif pressed[pygame.K_d] and pressed[pygame.K_LSHIFT]:
+        return 'D'
+    elif pressed[pygame.K_e] and pressed[pygame.K_LSHIFT]:
+        return 'E'
+    elif pressed[pygame.K_f] and pressed[pygame.K_LSHIFT]:
+        return 'F'
+    elif pressed[pygame.K_g] and pressed[pygame.K_LSHIFT]:
+        return 'G'
+    elif pressed[pygame.K_h] and pressed[pygame.K_LSHIFT]:
+        return 'H'
+    elif pressed[pygame.K_i] and pressed[pygame.K_LSHIFT]:
+        return 'I'
+    elif pressed[pygame.K_j] and pressed[pygame.K_LSHIFT]:
+        return 'J'
+    elif pressed[pygame.K_k] and pressed[pygame.K_LSHIFT]:
+        return 'K'
+    elif pressed[pygame.K_l] and pressed[pygame.K_LSHIFT]:
+        return 'L'
+    elif pressed[pygame.K_m] and pressed[pygame.K_LSHIFT]:
+        return 'M'
+    elif pressed[pygame.K_n] and pressed[pygame.K_LSHIFT]:
+        return 'N'
+    elif pressed[pygame.K_o] and pressed[pygame.K_LSHIFT]:
+        return 'O'
+    elif pressed[pygame.K_p] and pressed[pygame.K_LSHIFT]:
+        return 'P'
+    elif pressed[pygame.K_q] and pressed[pygame.K_LSHIFT]:
+        return 'Q'
+    elif pressed[pygame.K_r] and pressed[pygame.K_LSHIFT]:
+        return 'R'
+    elif pressed[pygame.K_s] and pressed[pygame.K_LSHIFT]:
+        return 'S'
+    elif pressed[pygame.K_t] and pressed[pygame.K_LSHIFT]:
+        return 'T'
+    elif pressed[pygame.K_u] and pressed[pygame.K_LSHIFT]:
+        return 'U'
+    elif pressed[pygame.K_v] and pressed[pygame.K_LSHIFT]:
+        return 'V'
+    elif pressed[pygame.K_w] and pressed[pygame.K_LSHIFT]:
+        return 'W'
+    elif pressed[pygame.K_x] and pressed[pygame.K_LSHIFT]:
+        return 'X'
+    elif pressed[pygame.K_y] and pressed[pygame.K_LSHIFT]:
+        return 'Y'
+    elif pressed[pygame.K_z] and pressed[pygame.K_LSHIFT]:
+        return 'Z'
+    elif pressed[pygame.K_a]:
         return 'a'
     elif pressed[pygame.K_b]:
         return 'b'

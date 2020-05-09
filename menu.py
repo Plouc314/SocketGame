@@ -67,8 +67,8 @@ class Menu:
         self.text_password = TextBox(DIM_TEXTBL,C.WHITE,
                                 (X_POS_TEXTBL, Y_POS_TEXTBL2), 'Password:', font=Font.f30)
 
-        self.input_username = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL),C.WHITE)
-        self.input_password = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL2),C.WHITE)
+        self.input_username = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL),C.WHITE, limit=10)
+        self.input_password = InputText(DIM_LOGINP, (X_POS_LOGINP, Y_POS_TEXTBL2),C.WHITE, limit=10, cache=True)
         self.button_done = Button(DIM_NB,C.LIGHT_BLUE, POS_BDONE, 'Done', font=Font.f30)
         self.button_back = Button(DIM_NB, C.LIGHT_BLUE, POS_BBACK,'Back', font=Font.f30)
         # state signup
@@ -172,8 +172,8 @@ class Menu:
         if self.button_back.pushed(events):
             self.state = 'main'
         if self.button_done.pushed(events):
-            username = self.input_username.text
-            password = self.input_password.text
+            username = self.input_username.content
+            password = self.input_password.content
             if self.client.log(username, password):
                 self.state = 'logged'
                 self.text_username.set_text(username)
@@ -189,8 +189,8 @@ class Menu:
         if self.button_back.pushed(events):
             self.state = 'main'
         if self.button_done.pushed(events):
-            username = self.input_username.text
-            password = self.input_password.text
+            username = self.input_username.content
+            password = self.input_password.content
             if self.client == 1:
                 self.state = 'logged'
             else:
