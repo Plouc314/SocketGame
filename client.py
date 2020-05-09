@@ -166,7 +166,7 @@ class Client:
                 except:
                     print(msg)
                     print("[ERROR] Can't handeln game message")
-                    self.in_env, self.in_game, self.in_game_session = False, False, False
+                    #self.in_env, self.in_game, self.in_game_session = False, False, False
 
     def handeln_game_msg(self, msg):
         infos = split_list('u', msg)
@@ -197,7 +197,7 @@ class Client:
     
     def send(self,msg):
         message = msg.encode(FORMAT)
-        message += b' ' * (HEADER - len(message))
+        message += b' ' * (150 - len(message))
         #msg_length = len(message)
         #send_length = str(msg_length).encode(FORMAT)
         #send_length += b' ' * (HEADER - len(send_length))
