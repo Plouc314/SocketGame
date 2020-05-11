@@ -9,6 +9,7 @@ helper
 menu
 teams
 stats
+credits
 game/game_menu
 game/main
 game/helper 

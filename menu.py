@@ -2,6 +2,7 @@ from base import TextBox, Button, InputText, Cadre, C, Font, dim, E
 from chat import Chat
 from friends import Friends
 from stats import Stats
+from credits import Credits 
 from game.main import run_game, start_game
 from helper import scale
 
@@ -58,6 +59,8 @@ class Menu:
         self.button_signup = Button(DIM_MAIN_B, C.LIGHT_BLUE,
                                 POS_BSIGN,'Sign up') 
 
+        self.button_credits = Button(DIM_LI_MAIN_B, C.LIGHT_BLUE, (LMARGE, LMARGE),'Credits',font=Font.f30)
+
         # state login
         self.title_login = TextBox(DIM_TITLE, C.WHITE, POS_TITLE,'Log in', font=Font.f100)
 
@@ -100,12 +103,14 @@ class Menu:
         self.title_account = TextBox(DIM_TITLE, C.WHITE, (POS_TITLE[0], POS_TITLE[1] + E(100)),'', font=Font.f100)
         Stats.init(client, POS_STATSY)
         self.Stats = Stats
+        # state credits
 
 
     def display_main(self):
         self.title_main.display()
         self.button_login.display()
         self.button_signup.display()
+        self.button_credits.display()
     
     def display_login(self):
         self.title_login.display()
@@ -160,11 +165,17 @@ class Menu:
         self.button_back.display()
         self.Stats.display()
 
+    def display_credits(self):
+        self.button_back.display()
+        Credits.display()
+
     def react_events_main(self, events, pressed):
         if self.button_login.pushed(events):
             self.state = 'login'
         elif self.button_signup.pushed(events):
             self.state = 'signup'
+        elif self.button_credits.pushed(events):
+            self.state = 'credits'
     
     def react_events_login(self, events, pressed):
         self.input_username.run(events, pressed)
@@ -250,6 +261,10 @@ class Menu:
         if self.button_back.pushed(events):
             self.state = 'logged'
 
+    def react_events_credits(self, events, pressed):
+        if self.button_back.pushed(events):
+            self.state = 'main'
+
     def disconn(self):
         self.client.disconn()
         self.state = 'main'
@@ -294,6 +309,9 @@ class Menu:
         elif self.state == 'account':
             self.display_account()
             self.react_events_account(events, pressed)
+        elif self.state == 'credits':
+            self.display_credits()
+            self.react_events_credits(events, pressed)
         
     def check_env_quit_players(self):
         for quit_username in self.client.quit_env_players:

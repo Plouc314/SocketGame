@@ -47,8 +47,8 @@ class Chat:
     def react_events(self, events, pressed):
         self.input_text.run(events, pressed)
         if self.button_send.pushed(events):
-            msg = self.input_text.text
-            self.input_text.text = ''
+            msg = self.input_text.content
+            self.input_text.content = ''
             self.client.send_chat_msg(msg)
             self.add_msg(self.client.username, msg)
             
